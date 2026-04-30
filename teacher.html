@@ -252,6 +252,14 @@ function evalRecord(r) {
   };
 }
 
+/* ════════ 預設 Firebase 設定（與 student.html 相同） ════════ */
+const DEFAULT_CONFIG = {
+  apiKey:    "AIzaSyA34R_iZ9DflFq7oEy4gnsXqEdAltObci4",
+  projectId: "eliteracy",
+  authDomain:"eliteracy.firebaseapp.com",
+  appId:     "1:390126425975:web:d51c3304c30bcb2254b372",
+};
+
 /* ════════ localStorage 快取設定 ════════ */
 const CFG_KEYS = ['apiKey','projectId','authDomain','appId'];
 function saveConfig() {
@@ -262,9 +270,13 @@ function saveConfig() {
 }
 function loadConfig() {
   try {
-    const cfg = JSON.parse(localStorage.getItem('fb_cfg') || '{}');
-    CFG_KEYS.forEach(k => { if(cfg[k]) document.getElementById('cfg_'+k).value = cfg[k]; });
-  } catch {}
+    const saved = JSON.parse(localStorage.getItem('fb_cfg') || '{}');
+    CFG_KEYS.forEach(k => {
+      document.getElementById('cfg_'+k).value = saved[k] || DEFAULT_CONFIG[k] || '';
+    });
+  } catch {
+    CFG_KEYS.forEach(k => { document.getElementById('cfg_'+k).value = DEFAULT_CONFIG[k] || ''; });
+  }
 }
 
 /* ════════ 連線 Firebase ════════ */
@@ -467,9 +479,10 @@ function exportCsv() {
   a.click();
 }
 
-/* ════════ 初始化 ════════ */
+/* ════════ 初始化：預填設定並自動連線 ════════ */
 loadConfig();
 hideAll();
+connectFirebase();
 </script>
 </body>
 </html>
