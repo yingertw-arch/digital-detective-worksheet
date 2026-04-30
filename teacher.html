@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>時光偵探｜教師後台</title>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
+
+:root {
+  --ink:#1a1a2e; --gold:#b8860b; --gold-l:#f5e6a3;
+  --cream:#faf8f2; --border:#c8b89a; --gray:#6b6b7a;
+  --green:#27ae60; --red:#e74c3c; --orange:#e67e22;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:'Noto Sans TC',sans-serif; background:#ede9dc; color:var(--ink); font-size:13px; line-height:1.6; padding:24px 16px 80px; }
+.container { max-width:1060px; margin:0 auto; }
+
+/* ── Header ── */
+.header { background:var(--ink); color:#fff; padding:16px 24px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+.header-left h1 { font-family:'Noto Serif TC',serif; font-size:20px; font-weight:900; letter-spacing:.08em; }
+.header-left p  { font-size:11px; color:rgba(255,255,255,.55); margin-top:2px; }
+.live-badge { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--gold-l); background:rgba(255,255,255,.08); padding:5px 12px; border:1px solid rgba(184,134,11,.4); }
+.live-dot { width:8px; height:8px; border-radius:50%; background:#888; flex-shrink:0; }
+.live-dot.on  { background:#27ae60; animation:pulse 1.4s ease-in-out infinite; }
+.live-dot.off { background:#e74c3c; animation:none; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+/* ── Setup card ── */
+.setup-card { background:var(--cream); border:2px solid var(--gold); padding:18px 22px; margin-bottom:20px; }
+.setup-title { font-family:'Noto Serif TC',serif; font-size:14px; font-weight:700; margin-bottom:4px; }
+.setup-desc  { font-size:11px; color:var(--gray); margin-bottom:12px; line-height:1.6; }
+.setup-grid  { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px; }
+.field-group { display:flex; flex-direction:column; gap:4px; }
+.field-group label { font-size:10px; color:var(--gray); font-weight:700; letter-spacing:.05em; }
+.field-input {
+  border:1.5px solid var(--border); background:#fff;
+  font-family:'Noto Sans TC',sans-serif; font-size:12px; color:var(--ink);
+  padding:6px 10px; outline:none; width:100%;
+}
+.field-input:focus { border-color:var(--gold); }
+.btn-row { display:flex; gap:8px; flex-wrap:wrap; }
+.btn {
+  background:var(--ink); color:var(--gold-l); border:none;
+  font-family:'Noto Serif TC',serif; font-size:12px; font-weight:700;
+  padding:8px 18px; cursor:pointer; letter-spacing:.06em; white-space:nowrap;
+}
+.btn:hover { background:var(--gold); color:var(--ink); }
+.btn.red   { background:var(--red); color:#fff; }
+.btn.red:hover { background:#c0392b; }
+.status-msg { font-size:12px; color:var(--gray); margin-top:8px; min-height:18px; }
+.status-msg.ok  { color:var(--green); }
+.status-msg.err { color:var(--red); }
+
+/* ── Stats bar ── */
+.stats-bar { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:20px; }
+.stat-card { background:var(--cream); padding:12px 16px; border:1.5px solid var(--border); text-align:center; }
+.stat-num   { font-family:'Noto Serif TC',serif; font-size:30px; font-weight:900; line-height:1; }
+.stat-label { font-size:11px; color:var(--gray); margin-top:3px; }
+
+/* ── Alert ── */
+.alert-card { background:#fff3e0; border:1.5px solid #f39c12; padding:12px 16px; margin-bottom:20px; }
+.alert-card h3 { font-size:12px; font-weight:700; color:var(--orange); margin-bottom:6px; }
+.alert-row { display:flex; align-items:center; gap:8px; font-size:12px; margin-bottom:4px; }
+.alert-bar-wrap { flex:1; background:#eee; height:8px; }
+.alert-bar-fill { height:8px; background:var(--red); }
+
+/* ── Charts ── */
+.charts-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
+.chart-card  { background:var(--cream); border:1.5px solid var(--border); padding:14px 16px; }
+.chart-title { font-family:'Noto Serif TC',serif; font-size:13px; font-weight:700; margin-bottom:10px; }
+.chart-wrap  { position:relative; height:200px; }
+
+/* ── Table ── */
+.table-card { background:var(--cream); border:1.5px solid var(--border); padding:14px 16px; margin-bottom:20px; }
+.table-top  { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px; }
+.table-top h2 { font-family:'Noto Serif TC',serif; font-size:13px; font-weight:700; }
+.tbl { width:100%; border-collapse:collapse; font-size:12px; }
+.tbl th { background:var(--ink); color:#fff; padding:6px 8px; text-align:left; font-weight:500; font-size:11px; white-space:nowrap; cursor:pointer; user-select:none; }
+.tbl th:hover { background:#2d2d4e; }
+.tbl td { padding:6px 8px; border-bottom:1px solid var(--border); vertical-align:middle; }
+.tbl tr:nth-child(even) td { background:rgba(200,184,154,.07); }
+.tbl tr:hover td { background:rgba(184,134,11,.08); }
+.score-hi { background:#e8f5e9; color:var(--green); font-weight:700; padding:2px 7px; font-size:11px; }
+.score-md { background:#fff3e0; color:var(--orange); font-weight:700; padding:2px 7px; font-size:11px; }
+.score-lo { background:#fdecea; color:var(--red);    font-weight:700; padding:2px 7px; font-size:11px; }
+.new-row td { animation:flash .8s ease; }
+@keyframes flash { 0%{background:#fffde7} 100%{background:transparent} }
+
+/* ── Empty ── */
+.empty { text-align:center; padding:60px 20px; color:var(--gray); }
+.empty .icon { font-size:52px; margin-bottom:10px; }
+.empty p { font-size:12px; }
+
+@media(max-width:700px) {
+  .stats-bar { grid-template-columns:repeat(2,1fr); }
+  .charts-grid { grid-template-columns:1fr; }
+  .setup-grid { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ── Header ── -->
+<div class="header">
+  <div class="header-left">
+    <h1>🕵️ 時光偵探學習單｜教師後台</h1>
+    <p>海山國小 · 第三節：數位素養與辨識 · Firebase 即時版</p>
+  </div>
+  <div class="live-badge">
+    <div class="live-dot" id="liveDot"></div>
+    <span id="liveLabel">未連線</span>
+  </div>
+</div>
+
+<!-- ── Firebase 設定 ── -->
+<div class="setup-card">
+  <div class="setup-title">🔥 Firebase 連線設定</div>
+  <div class="setup-desc">
+    請至 <strong>Firebase Console → 專案設定 → 你的應用程式</strong> 複製 firebaseConfig 的各欄位值。<br>
+    設定儲存在瀏覽器，下次開啟同一台電腦不需重填。
+  </div>
+  <div class="setup-grid">
+    <div class="field-group">
+      <label>API KEY</label>
+      <input class="field-input" id="cfg_apiKey" placeholder="AIzaSy...">
+    </div>
+    <div class="field-group">
+      <label>PROJECT ID</label>
+      <input class="field-input" id="cfg_projectId" placeholder="your-project-id">
+    </div>
+    <div class="field-group">
+      <label>AUTH DOMAIN</label>
+      <input class="field-input" id="cfg_authDomain" placeholder="your-project.firebaseapp.com">
+    </div>
+    <div class="field-group">
+      <label>APP ID</label>
+      <input class="field-input" id="cfg_appId" placeholder="1:123456:web:abc...">
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn" onclick="connectFirebase()">🔌 連線並開始監聽</button>
+    <button class="btn red" onclick="clearAll()">🗑 清除資料</button>
+    <button class="btn" style="background:#fff;color:var(--ink);border:1.5px solid var(--border);" onclick="exportCsv()">📥 匯出 CSV</button>
+  </div>
+  <div id="setupStatus" class="status-msg"></div>
+</div>
+
+<!-- ── Stats ── -->
+<div id="statsBar" class="stats-bar" style="display:none;">
+  <div class="stat-card"><div class="stat-num" id="st_n">0</div><div class="stat-label">作答人數</div></div>
+  <div class="stat-card"><div class="stat-num" id="st_avg">—</div><div class="stat-label">班級平均</div></div>
+  <div class="stat-card"><div class="stat-num" id="st_pass">—</div><div class="stat-label">通過率（≥14分）</div></div>
+  <div class="stat-card"><div class="stat-num" id="st_top">—</div><div class="stat-label">最高分</div></div>
+</div>
+
+<!-- ── 警示 ── -->
+<div id="alertCard" class="alert-card" style="display:none;">
+  <h3>⚠️ 需加強觀念（正確率 &lt; 60%）</h3>
+  <div id="alertList"></div>
+</div>
+
+<!-- ── Charts ── -->
+<div id="chartsGrid" class="charts-grid" style="display:none;">
+  <div class="chart-card">
+    <div class="chart-title">📊 分數分布</div>
+    <div class="chart-wrap"><canvas id="chartDist"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title">📈 各題正確率</div>
+    <div class="chart-wrap"><canvas id="chartAcc"></canvas></div>
+  </div>
+</div>
+
+<!-- ── Table ── -->
+<div id="tableCard" class="table-card" style="display:none;">
+  <div class="table-top">
+    <h2>📋 學生作答名單</h2>
+    <input type="text" class="field-input" id="searchInput" placeholder="搜尋姓名…" style="max-width:160px;" oninput="renderTable()">
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th onclick="sortBy('class_name')">班級</th>
+          <th onclick="sortBy('seat')">座號</th>
+          <th onclick="sortBy('name')">姓名</th>
+          <th>日期</th>
+          <th onclick="sortBy('score')">分數 ↕</th>
+          <th>Q1</th><th>Q2停</th><th>Q3看</th><th>Q4聽</th>
+          <th>Q5破綻</th><th>J1</th><th>J2</th><th>J3</th><th>J4</th>
+          <th>Q6</th><th>Q7</th><th>Q8</th><th>Q10</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── Empty ── -->
+<div class="empty" id="emptyState">
+  <div class="icon">🕵️</div>
+  <p>尚無學生作答資料</p>
+  <p>請填入 Firebase 設定並點擊「連線並開始監聽」</p>
+  <p style="margin-top:8px;color:#b8860b;">學生提交後將即時出現在此頁面</p>
+</div>
+
+</div>
+<script>
+/* ════════ 狀態 ════════ */
+let records = [];
+let unsubscribe = null;
+let db = null;
+let sortKey = 'seat', sortAsc = true;
+let chartDist = null, chartAcc = null;
+const COLLECTION = 'detective_submissions';
+
+/* ════════ 答案鍵 ════════ */
+const ANS = {
+  q1_action:'query', q1_stop:'b', q1_look:'b', q1_listen:'b',
+  flaw_correct:['text','finger','bg','physics'], flaw_wrong:['color','hd'],
+  j1:'fake', j2:'fake', j3:'fake', j4:'fake',
+  q2_connect:'b', q3_check_min:4,
+  photo_correct:['mosaic','consent','private'], photo_wrong:['direct'],
+  q3_complete:'b',
+};
+
+/* ════════ 評估各題對錯 ════════ */
+function evalRecord(r) {
+  const flaws = (r.q2_flaws||'').split(',').filter(Boolean);
+  const hit   = ANS.flaw_correct.filter(f=>flaws.includes(f));
+  const hitW  = ANS.flaw_wrong.filter(f=>flaws.includes(f));
+  const photo = (r.q3_photo||'').split(',').filter(Boolean);
+  const hitP  = ANS.photo_correct.filter(p=>photo.includes(p));
+  const hitPW = ANS.photo_wrong.filter(p=>photo.includes(p));
+  const chk   = (r.q3_check||'').split(',').filter(Boolean);
+  return {
+    q1_action:  r.q1_action  === ANS.q1_action,
+    q1_stop:    r.q1_stop    === ANS.q1_stop,
+    q1_look:    r.q1_look    === ANS.q1_look,
+    q1_listen:  r.q1_listen  === ANS.q1_listen,
+    q2_flaws:   hit.length>=3 && hitW.length===0,
+    j1: r.j1==='fake', j2: r.j2==='fake', j3: r.j3==='fake', j4: r.j4==='fake',
+    q2_connect: r.q2_connect === ANS.q2_connect,
+    q3_check:   chk.length  >= ANS.q3_check_min,
+    q3_photo:   hitP.length>=2 && hitPW.length===0,
+    q3_complete:r.q3_complete=== ANS.q3_complete,
+  };
+}
+
+/* ════════ localStorage 快取設定 ════════ */
+const CFG_KEYS = ['apiKey','projectId','authDomain','appId'];
+function saveConfig() {
+  const cfg = {};
+  CFG_KEYS.forEach(k => { cfg[k] = document.getElementById('cfg_'+k).value.trim(); });
+  localStorage.setItem('fb_cfg', JSON.stringify(cfg));
+  return cfg;
+}
+function loadConfig() {
+  try {
+    const cfg = JSON.parse(localStorage.getItem('fb_cfg') || '{}');
+    CFG_KEYS.forEach(k => { if(cfg[k]) document.getElementById('cfg_'+k).value = cfg[k]; });
+  } catch {}
+}
+
+/* ════════ 連線 Firebase ════════ */
+function connectFirebase() {
+  const cfg = saveConfig();
+  if (!cfg.projectId || !cfg.apiKey) {
+    setStatus('⚠️ 請至少填入 API Key 和 Project ID', 'err'); return;
+  }
+
+  // 停止舊監聽
+  if (unsubscribe) unsubscribe();
+
+  try {
+    // 若已初始化過則取得同一個 app
+    try { firebase.app(); } catch { firebase.initializeApp(cfg); }
+    db = firebase.firestore();
+  } catch(e) {
+    setStatus('❌ Firebase 初始化失敗：' + e.message, 'err'); return;
+  }
+
+  setStatus('🔄 連線中⋯⋯', '');
+  setLive(false, '連線中');
+
+  unsubscribe = db.collection(COLLECTION)
+    .orderBy('submitted_at', 'asc')
+    .onSnapshot(snapshot => {
+      const prevCount = records.length;
+      records = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setLive(true, `即時監聽中 · ${records.length} 筆`);
+      setStatus(`✅ 已連線，共 ${records.length} 筆學生作答`, 'ok');
+      render(records.length > prevCount && prevCount > 0);
+    }, err => {
+      setLive(false, '連線錯誤');
+      setStatus('❌ 監聽失敗：' + err.message + '（請確認 Firestore 安全規則允許讀取）', 'err');
+    });
+}
+
+/* ════════ 狀態 & Live 指示 ════════ */
+function setStatus(msg, type) {
+  const el = document.getElementById('setupStatus');
+  el.textContent = msg;
+  el.className = 'status-msg' + (type ? ' '+type : '');
+}
+function setLive(on, label) {
+  document.getElementById('liveDot').className = 'live-dot ' + (on ? 'on' : 'off');
+  document.getElementById('liveLabel').textContent = label;
+}
+
+/* ════════ 清除 ════════ */
+function clearAll() {
+  if (!confirm('確定要清除畫面上的所有資料嗎？（Firebase 資料庫不受影響）')) return;
+  if (unsubscribe) { unsubscribe(); unsubscribe=null; }
+  records = [];
+  setLive(false, '未連線');
+  setStatus('已中斷連線', '');
+  hideAll();
+}
+
+/* ════════ 全部渲染 ════════ */
+function render(flash=false) {
+  if (!records.length) { hideAll(); return; }
+  document.getElementById('emptyState').style.display = 'none';
+  renderStats();
+  renderAlerts();
+  renderCharts();
+  renderTable(flash);
+  ['statsBar','chartsGrid','tableCard'].forEach(id =>
+    document.getElementById(id).style.display = '');
+}
+function hideAll() {
+  ['statsBar','chartsGrid','tableCard','alertCard'].forEach(id =>
+    document.getElementById(id).style.display = 'none');
+  document.getElementById('emptyState').style.display = 'block';
+}
+
+/* ════════ 統計卡 ════════ */
+function renderStats() {
+  const n   = records.length;
+  const avg = n ? (records.reduce((s,r)=>s+(Number(r.score)||0),0)/n).toFixed(1) : '—';
+  const pass= n ? Math.round(records.filter(r=>r.score>=14).length/n*100)+'%' : '—';
+  const top = n ? Math.max(...records.map(r=>Number(r.score)||0)) : '—';
+  document.getElementById('st_n').textContent   = n;
+  document.getElementById('st_avg').textContent = avg;
+  document.getElementById('st_pass').textContent= pass;
+  document.getElementById('st_top').textContent = top;
+}
+
+/* ════════ 正確率 ════════ */
+const Q_LABELS = ['Q1可疑截圖','Q2停','Q3看','Q4聽','Q5破綻','J1路標','J2手指','J3建築','J4臉清晰','Q6連結','Q7清單','Q8照片','Q10句子'];
+const Q_KEYS   = ['q1_action','q1_stop','q1_look','q1_listen','q2_flaws','j1','j2','j3','j4','q2_connect','q3_check','q3_photo','q3_complete'];
+
+function calcAcc() {
+  return Q_KEYS.map(k =>
+    records.length ? Math.round(records.filter(r=>evalRecord(r)[k]).length/records.length*100) : 0
+  );
+}
+
+/* ════════ 警示 ════════ */
+function renderAlerts() {
+  const acc = calcAcc();
+  const low = Q_LABELS.map((l,i)=>({label:l,pct:acc[i]})).filter(x=>x.pct<60);
+  const card = document.getElementById('alertCard');
+  if (!low.length) { card.style.display='none'; return; }
+  card.style.display = 'block';
+  document.getElementById('alertList').innerHTML = low.map(x=>`
+    <div class="alert-row">
+      <strong style="min-width:90px;">${x.label}</strong>
+      <div class="alert-bar-wrap"><div class="alert-bar-fill" style="width:${x.pct}%;"></div></div>
+      <span style="color:#e74c3c;min-width:34px;">${x.pct}%</span>
+      <span style="color:#888;">建議再次講解</span>
+    </div>`).join('');
+}
+
+/* ════════ 圖表 ════════ */
+function renderCharts() {
+  const bins = [0,0,0,0];
+  records.forEach(r => {
+    const s = Number(r.score)||0;
+    if(s<10) bins[0]++; else if(s<14) bins[1]++; else if(s<18) bins[2]++; else bins[3]++;
+  });
+  if(chartDist) chartDist.destroy();
+  chartDist = new Chart(document.getElementById('chartDist'),{
+    type:'bar',
+    data:{ labels:['0–9分','10–13分','14–17分','18–20分'],
+           datasets:[{data:bins,backgroundColor:['#e74c3c','#e67e22','#3498db','#27ae60']}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+             scales:{y:{beginAtZero:true,ticks:{precision:0}}}}
+  });
+
+  const acc = calcAcc();
+  if(chartAcc) chartAcc.destroy();
+  chartAcc = new Chart(document.getElementById('chartAcc'),{
+    type:'bar',
+    data:{ labels:Q_LABELS,
+           datasets:[{data:acc,backgroundColor:acc.map(p=>p>=80?'#27ae60':p>=60?'#f39c12':'#e74c3c')}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+             plugins:{legend:{display:false}},
+             scales:{x:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%'}}}}
+  });
+}
+
+/* ════════ 表格 ════════ */
+function sortBy(k) {
+  sortAsc = sortKey===k ? !sortAsc : true;
+  sortKey = k;
+  renderTable();
+}
+const tick = b => b ? '✅' : '❌';
+function badge(s) {
+  s = Number(s)||0;
+  const cls = s>=18?'score-hi':s>=14?'score-md':'score-lo';
+  return `<span class="${cls}">${s}</span>`;
+}
+function renderTable(flash=false) {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  let data = [...records];
+  if(q) data = data.filter(r=>(r.name||'').toLowerCase().includes(q)||(r.class_name||'').includes(q));
+  data.sort((a,b)=>{
+    let av=a[sortKey]??'', bv=b[sortKey]??'';
+    if(!isNaN(av)&&!isNaN(bv)){av=Number(av);bv=Number(bv);}
+    return sortAsc ? (av<bv?-1:av>bv?1:0) : (av>bv?-1:av<bv?1:0);
+  });
+  document.getElementById('tableBody').innerHTML = data.map((r,i)=>{
+    const ev = evalRecord(r);
+    const isNew = flash && i===0;
+    return `<tr${isNew?' class="new-row"':''}>
+      <td>${r.class_name||''}</td>
+      <td>${r.seat||''}</td>
+      <td><strong>${r.name||''}</strong></td>
+      <td style="white-space:nowrap;font-size:11px;">${r.date||''}</td>
+      <td>${badge(r.score)}</td>
+      <td>${tick(ev.q1_action)}</td><td>${tick(ev.q1_stop)}</td>
+      <td>${tick(ev.q1_look)}</td><td>${tick(ev.q1_listen)}</td>
+      <td>${tick(ev.q2_flaws)}</td>
+      <td>${tick(ev.j1)}</td><td>${tick(ev.j2)}</td>
+      <td>${tick(ev.j3)}</td><td>${tick(ev.j4)}</td>
+      <td>${tick(ev.q2_connect)}</td>
+      <td>${tick(ev.q3_check)}</td><td>${tick(ev.q3_photo)}</td>
+      <td>${tick(ev.q3_complete)}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ════════ 匯出 CSV ════════ */
+function exportCsv() {
+  if(!records.length){ alert('尚無資料可匯出'); return; }
+  const hdrs = ['姓名','班級','座號','日期','總分','Q1','Q2停','Q3看','Q4聽','Q5破綻','J1','J2','J3','J4','Q6','Q7','Q8','Q10'];
+  const rows = records.map(r=>{
+    const ev=evalRecord(r);
+    return [r.name,r.class_name,r.seat,r.date,r.score,
+      tick(ev.q1_action),tick(ev.q1_stop),tick(ev.q1_look),tick(ev.q1_listen),
+      tick(ev.q2_flaws),tick(ev.j1),tick(ev.j2),tick(ev.j3),tick(ev.j4),
+      tick(ev.q2_connect),tick(ev.q3_check),tick(ev.q3_photo),tick(ev.q3_complete)
+    ].map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',');
+  });
+  const csv = '\uFEFF' + [hdrs.join(','),...rows].join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download = `時光偵探成效_${new Date().toLocaleDateString('zh-TW')}.csv`;
+  a.click();
+}
+
+/* ════════ 初始化 ════════ */
+loadConfig();
+hideAll();
+</script>
+</body>
+</html>

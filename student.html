@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>時光偵探學習單｜真相背後</title>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
+
+:root {
+  --ink: #1a1a2e;
+  --ink2: #2d2d44;
+  --gold: #b8860b;
+  --gold-light: #f5e6a3;
+  --cream: #faf8f2;
+  --red: #c0392b;
+  --border: #c8b89a;
+  --gray: #6b6b7a;
+  --green: #27ae60;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  background: #ede9dc;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 24px 0 80px;
+}
+
+.page {
+  width: min(210mm, 96%);
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 12mm 14mm 10mm;
+  background: var(--cream);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 6px 32px rgba(0,0,0,0.18);
+}
+
+.page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(0deg,transparent,transparent 24px,rgba(180,160,120,.07) 24px,rgba(180,160,120,.07) 25px),
+    repeating-linear-gradient(90deg,transparent,transparent 24px,rgba(180,160,120,.04) 24px,rgba(180,160,120,.04) 25px);
+  pointer-events: none; z-index: 0;
+}
+.page > * { position: relative; z-index: 1; }
+
+/* ── Header ── */
+.header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  border-bottom: 3px solid var(--ink);
+  padding-bottom: 8px; margin-bottom: 10px;
+}
+.school-name { font-size: 11px; color: var(--gray); letter-spacing:.1em; margin-bottom:3px; }
+.lesson-title { font-family:'Noto Serif TC',serif; font-size:20px; font-weight:900; letter-spacing:.05em; line-height:1.2; }
+.lesson-sub { font-size:12px; color:var(--gold); font-weight:700; letter-spacing:.08em; margin-top:2px; }
+.badge { background:var(--ink); color:#fff; font-family:'Noto Serif TC',serif; font-size:11px; font-weight:700; padding:4px 10px; letter-spacing:.1em; white-space:nowrap; margin-top:4px; }
+
+/* ── Info row ── */
+.info-row { display:flex; flex-wrap:wrap; gap:12px; margin-bottom:10px; align-items:center; }
+.info-field { display:flex; align-items:center; gap:6px; font-size:12px; }
+.info-label { color:var(--gray); white-space:nowrap; }
+.info-input {
+  border:none; border-bottom:1.5px solid var(--ink);
+  background:transparent; font-family:'Noto Sans TC',sans-serif;
+  font-size:13px; color:var(--ink); padding:1px 4px; min-width:60px; outline:none;
+}
+.info-input.wide { min-width:100px; }
+.info-input:focus { border-bottom-color:var(--gold); }
+
+/* ── Section ── */
+.section { margin-bottom:12px; }
+.section-header { display:flex; align-items:center; gap:8px; margin-bottom:7px; }
+.section-num {
+  background:var(--ink); color:var(--gold-light);
+  font-family:'Noto Serif TC',serif; font-weight:900; font-size:13px;
+  width:26px; height:26px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.section-title { font-family:'Noto Serif TC',serif; font-size:14px; font-weight:700; letter-spacing:.04em; }
+.section-time { font-size:11px; color:var(--gray); margin-left:auto; white-space:nowrap; }
+.divider-line { flex:1; height:1px; background:linear-gradient(to right,var(--ink),transparent); margin:0 6px; }
+.tip { font-size:10px; color:var(--gray); font-style:italic; margin-bottom:7px; padding-left:4px; border-left:2px solid var(--gold-light); line-height:1.5; }
+
+/* ── Image trio ── */
+.observe-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:10px; }
+.obs-card { border:1.5px solid var(--border); background:#fff; padding:8px 8px 7px; }
+.obs-label { font-size:10px; color:var(--gray); margin-bottom:4px; display:flex; justify-content:space-between; align-items:center; }
+.obs-tag { background:var(--gold-light); color:var(--gold); font-size:9px; font-weight:700; padding:1px 5px; }
+.obs-img-box { width:100%; aspect-ratio:4/3; overflow:hidden; margin-bottom:6px; background:#e8e0d0; position:relative; }
+.obs-img-box img { width:100%; height:100%; object-fit:cover; display:block; transition:filter .6s; }
+.img-blurred { filter:blur(7px) brightness(.92); }
+.img-partial { object-position:65% 25%; transform:scale(3.5); transform-origin:65% 25%; }
+
+.reveal-btn {
+  position:absolute; bottom:5px; left:50%; transform:translateX(-50%);
+  background:var(--ink); color:var(--gold-light); border:none;
+  font-size:10px; padding:3px 9px; cursor:pointer;
+  font-family:'Noto Sans TC',sans-serif; letter-spacing:.05em; z-index:5;
+  white-space:nowrap;
+}
+.reveal-btn:hover { background:var(--gold); color:var(--ink); }
+
+/* ── Options ── */
+.q-block { margin-bottom:9px; }
+.q-label { font-size:12px; font-weight:600; color:var(--ink); margin-bottom:5px; line-height:1.5; }
+.q-num { background:var(--ink); color:var(--gold-light); font-size:10px; font-weight:700; padding:1px 6px; margin-right:4px; font-family:'Noto Serif TC',serif; }
+
+.options-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:5px; }
+.options-grid.col1 { grid-template-columns:1fr; }
+.opt {
+  display:flex; align-items:center; gap:6px;
+  padding:5px 8px; border:1.5px solid var(--border);
+  background:#fff; cursor:pointer; transition:border-color .15s,background .15s;
+  font-size:12px; user-select:none;
+}
+.opt:hover { border-color:var(--gold); background:var(--gold-light); }
+.opt input { accent-color:var(--ink); width:14px; height:14px; flex-shrink:0; cursor:pointer; }
+.opt.answered-correct { border-color:#27ae60 !important; background:#e8f5e9 !important; }
+.opt.answered-wrong   { border-color:#e74c3c !important; background:#fdecea !important; }
+.opt.missed-correct   { border-color:#27ae60 !important; background:rgba(39,174,96,.08) !important; }
+
+/* ── Short text ── */
+.short-answer {
+  width:100%; border:none; border-bottom:1.5px solid var(--border);
+  background:transparent; font-family:'Noto Sans TC',sans-serif;
+  font-size:12px; color:var(--ink); padding:3px 2px; outline:none; margin-top:4px;
+}
+.short-answer:focus { border-bottom-color:var(--gold); }
+.char-count { font-size:10px; color:var(--gray); text-align:right; }
+
+/* ── Select ── */
+.q-select {
+  border:1.5px solid var(--border); background:#fff;
+  font-family:'Noto Sans TC',sans-serif; font-size:12px; color:var(--ink);
+  padding:5px 8px; margin-top:4px; width:100%; cursor:pointer; outline:none;
+}
+.q-select:focus { border-color:var(--gold); }
+
+/* ── Judgment table ── */
+.judge-table { width:100%; border-collapse:collapse; margin-bottom:8px; font-size:12px; }
+.judge-table th { background:var(--ink); color:#fff; padding:5px 8px; font-weight:500; font-size:11px; text-align:center; }
+.judge-table td { padding:6px 8px; border-bottom:1px solid var(--border); vertical-align:middle; }
+.judge-table tr:nth-child(even) td { background:rgba(200,184,154,.1); }
+.judge-table .jcell { text-align:center; }
+.judge-table input[type="radio"] { accent-color:var(--ink); width:15px; height:15px; cursor:pointer; }
+.judge-table tr.j-correct td { background:#e8f5e9 !important; }
+.judge-table tr.j-wrong   td { background:#fdecea !important; }
+
+/* ── AI detect grid ── */
+.ai-detect-grid { display:grid; grid-template-columns:200px 1fr; gap:10px; margin-bottom:10px; align-items:start; }
+.ai-img-box { border:1.5px solid var(--border); background:#fff; padding:8px; }
+.ai-img-box img { width:100%; display:block; border:1px solid rgba(200,184,154,.4); }
+.ai-src { font-size:9px; color:var(--gray); margin-top:4px; text-align:center; }
+.ai-src a { color:var(--gold); }
+
+/* ── Checklist ── */
+.checklist { background:#fff; border:1.5px solid var(--border); padding:8px 10px; margin-bottom:9px; }
+.check-item {
+  display:flex; align-items:flex-start; gap:7px;
+  padding:5px 0; border-bottom:1px solid rgba(200,184,154,.35);
+  font-size:12px; line-height:1.5; cursor:pointer;
+}
+.check-item:last-child { border-bottom:none; }
+.check-item input { accent-color:var(--ink); width:16px; height:16px; flex-shrink:0; margin-top:2px; cursor:pointer; }
+.check-num { font-weight:700; color:var(--gold); min-width:16px; flex-shrink:0; }
+
+/* ── Oath ── */
+.oath-box {
+  border:2.5px double var(--ink); padding:10px 14px;
+  text-align:center; background:#fff; position:relative; margin-top:12px;
+}
+.oath-box::before,.oath-box::after { content:'✦'; position:absolute; color:var(--gold); font-size:10px; }
+.oath-box::before { top:5px; left:8px; }
+.oath-box::after  { bottom:5px; right:8px; }
+.oath-title { font-family:'Noto Serif TC',serif; font-size:13px; font-weight:900; letter-spacing:.15em; margin-bottom:5px; }
+.oath-text { font-size:11px; color:var(--ink2); line-height:1.8; letter-spacing:.03em; margin-bottom:12px; }
+
+/* ── Signature ── */
+.sig-area { display:flex; flex-direction:column; align-items:center; gap:6px; }
+.sig-label { font-size:11px; color:var(--gray); }
+#sigCanvas {
+  border:1.5px solid var(--ink); cursor:crosshair; background:#fff;
+  touch-action:none; max-width:100%;
+}
+.sig-btn { font-size:11px; color:var(--gray); background:none; border:1px solid var(--border); padding:2px 10px; cursor:pointer; }
+.sig-btn:hover { border-color:var(--red); color:var(--red); }
+
+/* Tape */
+.tape-h { display:block; width:50px; height:14px; background:rgba(245,200,0,.55); margin:-2px auto 6px; transform:rotate(-1deg); }
+
+/* ── Submit button ── */
+.submit-area { text-align:center; margin:20px 0 10px; }
+.submit-btn {
+  background:var(--ink); color:var(--gold-light); border:none;
+  font-family:'Noto Serif TC',serif; font-size:15px; font-weight:700;
+  padding:13px 44px; cursor:pointer; letter-spacing:.1em; transition:all .2s;
+}
+.submit-btn:hover { background:var(--gold); color:var(--ink); }
+.submit-btn:disabled { background:var(--gray); cursor:not-allowed; }
+.submit-hint { font-size:11px; color:var(--gray); margin-top:6px; }
+
+/* ── Results ── */
+#resultsSection { display:none; margin-top:20px; border:3px solid var(--gold); padding:16px 18px; background:#fff; }
+.score-header { text-align:center; margin-bottom:14px; }
+.score-big { font-family:'Noto Serif TC',serif; font-size:52px; font-weight:900; line-height:1; }
+.score-sub { font-size:16px; color:var(--gray); }
+.score-msg { font-size:13px; color:var(--ink2); margin-top:6px; }
+.fb-item { display:flex; gap:8px; padding:7px; margin-bottom:5px; font-size:12px; align-items:flex-start; border-radius:2px; }
+.fb-item.ok  { background:#e8f5e9; }
+.fb-item.bad { background:#fff3e0; }
+.fb-icon { font-size:16px; flex-shrink:0; }
+.fb-text strong { display:block; margin-bottom:2px; }
+.fb-explain { font-size:11px; color:var(--gray); margin-top:3px; border-left:2px solid var(--gold); padding-left:6px; }
+
+/* ── Certificate ── */
+#certSection { display:none; margin-top:18px; text-align:center; }
+.cert-title-label { font-family:'Noto Serif TC',serif; font-size:13px; font-weight:700; letter-spacing:.1em; margin-bottom:10px; }
+#certCanvas { max-width:100%; border:2px solid var(--gold); }
+.cert-btn {
+  display:inline-block; margin-top:10px;
+  background:var(--ink); color:var(--gold-light); border:none;
+  font-family:'Noto Serif TC',serif; font-size:13px; font-weight:700;
+  padding:10px 28px; cursor:pointer; letter-spacing:.08em;
+}
+.cert-btn:hover { background:var(--gold); color:var(--ink); }
+
+.send-status { text-align:center; font-size:11px; color:var(--gray); margin-top:8px; }
+
+/* ── Missing warning ── */
+.warn-box { background:#fff3e0; border:1.5px solid #f39c12; padding:8px 12px; margin-bottom:10px; font-size:12px; display:none; }
+
+@media (max-width:600px) {
+  .page { padding:8mm 8mm 6mm; }
+  .observe-grid { grid-template-columns:1fr; }
+  .options-grid { grid-template-columns:1fr !important; }
+  .ai-detect-grid { grid-template-columns:1fr; }
+}
+@media print {
+  body { background:#fff; padding:0; }
+  .page { box-shadow:none; margin:0; width:100%; padding:10mm 12mm 8mm; }
+  .submit-area,.warn-box,#resultsSection,#certSection { display:none !important; }
+  * { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- ── 頁首 ── -->
+<div class="header">
+  <div class="header-left">
+    <div class="school-name">新北市板橋區海山國小｜國語文學習單</div>
+    <div class="lesson-title">🕵️ 時光偵探學習單</div>
+    <div class="lesson-sub">第三節：真相背後——數位素養與辨識</div>
+  </div>
+  <div class="badge">素養篇</div>
+</div>
+
+<!-- ── 學生資訊 ── -->
+<div class="info-row">
+  <div class="info-field">
+    <span class="info-label">班級</span>
+    <input type="text" id="s_class" class="info-input" placeholder="　班" maxlength="6">
+  </div>
+  <div class="info-field">
+    <span class="info-label">座號</span>
+    <input type="number" id="s_seat" class="info-input" placeholder="號" min="1" max="50" style="min-width:48px">
+  </div>
+  <div class="info-field">
+    <span class="info-label">姓名</span>
+    <input type="text" id="s_name" class="info-input wide" placeholder="請輸入姓名" maxlength="10">
+  </div>
+  <div class="info-field">
+    <span class="info-label">日期</span>
+    <input type="date" id="s_date" class="info-input">
+  </div>
+</div>
+<div class="warn-box" id="warnBox"></div>
+
+<!-- ══ 活動一：破解模糊的假象 ══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">一</div>
+    <div class="section-title">破解模糊的假象</div>
+    <div class="divider-line"></div>
+    <div class="section-time">🕐 15 分鐘</div>
+  </div>
+  <p class="tip">老師展示了照片模糊化工具，你也親手拉動過滑桿了！來觀察三張圖片的差異，再回答下面的問題。圖片取自「教育部數位素養教育平台」eliteracy.edu.tw。</p>
+
+  <!-- 三圖互動 -->
+  <div class="observe-grid">
+    <div class="obs-card">
+      <div class="obs-label"><span>圖①：模糊圖</span><span class="obs-tag">初次看到</span></div>
+      <div class="obs-img-box">
+        <img id="img1"
+             src="https://eliteracy.edu.tw/Figures/pack/pack-2025-11-21-07-05-25.png"
+             class="img-blurred" alt="模糊示範圖"
+             onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;font-size:10px;color:#888;text-align:center;padding:8px;\'>📷 模糊圖<br>（圖片無法載入，<br>請確認網路）</div>'">
+      </div>
+      <div style="font-size:10px;color:var(--gray);margin-bottom:3px;">我能看出的是？</div>
+      <label class="opt" style="font-size:11px;padding:3px 6px;margin-bottom:2px;">
+        <input type="radio" name="q1_obs1" value="a"> 一個人的臉
+      </label>
+      <label class="opt" style="font-size:11px;padding:3px 6px;margin-bottom:2px;">
+        <input type="radio" name="q1_obs1" value="b"> 一棟建築物
+      </label>
+      <label class="opt" style="font-size:11px;padding:3px 6px;margin-bottom:2px;" data-correct="q1_obs1:c">
+        <input type="radio" name="q1_obs1" value="c"> 看不清楚，太模糊了
+      </label>
+      <label class="opt" style="font-size:11px;padding:3px 6px;">
+        <input type="radio" name="q1_obs1" value="d"> 一些文字
+      </label>
+    </div>
+
+    <div class="obs-card">
+      <div class="obs-label"><span>圖②：極小局部圖</span><span class="obs-tag">誤導版</span></div>
+      <div class="obs-img-box">
+        <img id="img2"
+             src="https://eliteracy.edu.tw/Figures/pack/pack-2025-11-21-07-05-25.png"
+             class="img-partial" alt="局部示範圖"
+             onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;font-size:10px;color:#888;text-align:center;\'>🔍 局部圖</div>'">
+      </div>
+      <div style="font-size:10px;color:var(--gray);margin-bottom:3px;">當時我以為是？</div>
+      <label class="opt" style="font-size:11px;padding:3px 6px;margin-bottom:2px;">
+        <input type="radio" name="q1_obs2" value="a"> 一片草地
+      </label>
+      <label class="opt" style="font-size:11px;padding:3px 6px;margin-bottom:2px;">
+        <input type="radio" name="q1_obs2" value="b"> 動物的毛
+      </label>
+      <label class="opt" style="font-size:11px;padding:3px 6px;margin-bottom:2px;">
+        <input type="radio" name="q1_obs2" value="c"> 天空中的雲
+      </label>
+      <label class="opt" style="font-size:11px;padding:3px 6px;" data-correct="q1_obs2:d">
+        <input type="radio" name="q1_obs2" value="d"> 完全猜不出來！
+      </label>
+    </div>
+
+    <div class="obs-card">
+      <div class="obs-label"><span>圖③：清晰原圖</span><span class="obs-tag">顯影後</span></div>
+      <div class="obs-img-box" style="position:relative;">
+        <img id="img3"
+             src="https://eliteracy.edu.tw/Figures/pack/pack-2025-11-21-07-05-25.png"
+             style="filter:blur(16px);transition:filter .7s;" alt="清晰原圖"
+             onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;font-size:10px;color:#888;text-align:center;\'>✅ 清晰圖</div>'">
+        <button class="reveal-btn" id="revealBtn" onclick="revealImage()">🔍 顯影！</button>
+      </div>
+      <div style="font-size:10px;color:var(--gray);text-align:center;margin-top:4px;" id="revealMsg">按下顯影，看清真相</div>
+    </div>
+  </div>
+
+  <!-- Q1 討論題 -->
+  <div class="q-block">
+    <div class="q-label">
+      <span class="q-num">Q1</span>
+      當網路出現一張「爆料截圖」，圖片又模糊又只有局部，你會怎麼做？
+    </div>
+    <div class="options-grid">
+      <label class="opt"><input type="radio" name="q1_action" value="share"> 馬上分享給朋友</label>
+      <label class="opt" data-correct="q1_action:query"><input type="radio" name="q1_action" value="query"> 先停下來查證</label>
+      <label class="opt"><input type="radio" name="q1_action" value="ignore"> 忽略不理</label>
+      <label class="opt"><input type="radio" name="q1_action" value="other"> 其他</label>
+    </div>
+    <div style="margin-top:5px;">
+      <span style="font-size:11px;color:var(--gray);">我的理由（最多 30 字）：</span>
+      <input type="text" id="q1_reason" class="short-answer" maxlength="30" placeholder="說說你的想法…">
+      <div class="char-count"><span id="q1_reason_cnt">0</span> / 30</div>
+    </div>
+  </div>
+
+  <!-- Q2~Q4 停看聽 -->
+  <div style="background:#fff;border:1.5px solid var(--border);padding:8px 10px;margin-bottom:6px;">
+    <div style="font-size:12px;font-weight:700;color:var(--ink);margin-bottom:8px;">📋 停、看、聽三步驟：你會怎麼做？</div>
+
+    <div class="q-block" style="margin-bottom:8px;">
+      <div class="q-label"><span class="q-num">Q2</span>【停 STOP】你的第一個動作是？</div>
+      <div class="options-grid col1">
+        <label class="opt"><input type="radio" name="q1_stop" value="a"> 立刻截圖傳給朋友</label>
+        <label class="opt" data-correct="q1_stop:b"><input type="radio" name="q1_stop" value="b"> 暫停，不要馬上轉發</label>
+        <label class="opt"><input type="radio" name="q1_stop" value="c"> 把連結貼到班級群組</label>
+      </div>
+    </div>
+
+    <div class="q-block" style="margin-bottom:8px;">
+      <div class="q-label"><span class="q-num">Q3</span>【看 LOOK】你會怎麼查來源？</div>
+      <div class="options-grid col1">
+        <label class="opt"><input type="radio" name="q1_look" value="a"> 看這則貼文的按讚數</label>
+        <label class="opt" data-correct="q1_look:b"><input type="radio" name="q1_look" value="b"> 找出原始來源，查看完整脈絡</label>
+        <label class="opt"><input type="radio" name="q1_look" value="c"> 問同學有沒有聽說過</label>
+      </div>
+    </div>
+
+    <div class="q-block" style="margin-bottom:0;">
+      <div class="q-label"><span class="q-num">Q4</span>【聽 LISTEN】你會怎麼參考多方說法？</div>
+      <div class="options-grid col1">
+        <label class="opt"><input type="radio" name="q1_listen" value="a"> 只相信第一個看到的資訊</label>
+        <label class="opt" data-correct="q1_listen:b"><input type="radio" name="q1_listen" value="b"> 搜尋其他媒體有沒有同樣報導</label>
+        <label class="opt"><input type="radio" name="q1_listen" value="c"> 相信轉發最多的那個版本</label>
+      </div>
+    </div>
+  </div>
+</div><!-- end 活動一 -->
+
+<!-- ══ 活動二：框架與 AI 的陷阱 ══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">二</div>
+    <div class="section-title">框架與 AI 的陷阱</div>
+    <div class="divider-line"></div>
+    <div class="section-time">🕐 15 分鐘</div>
+  </div>
+  <p class="tip">以下是來自「教育部數位素養教育平台」的 Deepfake 深偽教材封面。觀察後，選出 AI 生成圖片的常見破綻！</p>
+
+  <!-- AI 圖片 + 多選破綻 -->
+  <div class="ai-detect-grid">
+    <div class="ai-img-box">
+      <img src="https://eliteracy.edu.tw/Figures/pack/pack-2025-11-21-07-05-25.png"
+           alt="Deepfake 教材封面"
+           onerror="this.outerHTML='<div style=\'background:#e8e0d0;height:180px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;font-size:12px;color:#6b6b7a;text-align:center;padding:12px;\'>🤖<br><strong>AI / Deepfake</strong><br>示例圖片<br><a href=\'https://eliteracy.edu.tw\' target=\'_blank\' style=\'color:#b8860b;font-size:11px;\'>請至平台查看真實案例</a></div>'">
+      <div class="ai-src">圖源：<a href="https://eliteracy.edu.tw" target="_blank">eliteracy.edu.tw</a></div>
+    </div>
+
+    <div>
+      <div class="q-block">
+        <div class="q-label">
+          <span class="q-num">Q5</span>
+          以下哪些是 AI 生成圖片常見的破綻？（可多選，選出你知道的！）
+        </div>
+        <div class="options-grid col1" style="gap:4px;">
+          <label class="opt" data-correct="q2_flaw:text"><input type="checkbox" name="q2_flaw" value="text"> 圖中文字出現亂碼或怪字</label>
+          <label class="opt" data-correct="q2_flaw:finger"><input type="checkbox" name="q2_flaw" value="finger"> 人物手指數量異常（≠ 5 根）</label>
+          <label class="opt" data-correct="q2_flaw:bg"><input type="checkbox" name="q2_flaw" value="bg"> 背景中物體無故重複出現</label>
+          <label class="opt" data-correct="q2_flaw:physics"><input type="checkbox" name="q2_flaw" value="physics"> 物理現象不合理（水往高處流）</label>
+          <label class="opt"><input type="checkbox" name="q2_flaw" value="color"> 圖片顏色很鮮豔</label>
+          <label class="opt"><input type="checkbox" name="q2_flaw" value="hd"> 照片解析度非常高</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q2b 判斷表 -->
+  <table class="judge-table" id="judgeTable">
+    <thead>
+      <tr>
+        <th style="width:62%;text-align:left;padding-left:10px;">情境</th>
+        <th style="width:19%;">是真實照片</th>
+        <th style="width:19%;">可能是假圖</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr id="jrow1">
+        <td>一則新聞附了一張圖，圖中的路標文字看起來很奇怪</td>
+        <td class="jcell"><input type="radio" name="j1" value="real"></td>
+        <td class="jcell"><input type="radio" name="j1" value="fake"></td>
+      </tr>
+      <tr id="jrow2">
+        <td>一個人在照片中有 7 根手指</td>
+        <td class="jcell"><input type="radio" name="j2" value="real"></td>
+        <td class="jcell"><input type="radio" name="j2" value="fake"></td>
+      </tr>
+      <tr id="jrow3">
+        <td>照片中同一棟建築物在背景裡出現了兩次</td>
+        <td class="jcell"><input type="radio" name="j3" value="real"></td>
+        <td class="jcell"><input type="radio" name="j3" value="fake"></td>
+      </tr>
+      <tr id="jrow4">
+        <td>某政治人物的照片，背景模糊但人臉非常清晰</td>
+        <td class="jcell"><input type="radio" name="j4" value="real"></td>
+        <td class="jcell"><input type="radio" name="j4" value="fake"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Q6 連結體驗 -->
+  <div class="q-block">
+    <div class="q-label">
+      <span class="q-num">Q6</span>
+      在第一節你輸入密碼「0987」查看真相大圖，這個動作和現實查證最像的地方是？
+    </div>
+    <div class="options-grid col1">
+      <label class="opt"><input type="radio" name="q2_connect" value="a"> 有了密碼，想看就看，不需多想</label>
+      <label class="opt" data-correct="q2_connect:b"><input type="radio" name="q2_connect" value="b"> 查看真相需要主動找到完整的資訊</label>
+      <label class="opt"><input type="radio" name="q2_connect" value="c"> 科技讓辨別假圖變得很簡單</label>
+      <label class="opt"><input type="radio" name="q2_connect" value="d"> 只要圖片清晰就代表是真的</label>
+    </div>
+  </div>
+</div><!-- end 活動二 -->
+
+<!-- ══ 活動三：數位分享的最後一關 ══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">三</div>
+    <div class="section-title">數位分享的最後一關</div>
+    <div class="divider-line"></div>
+    <div class="section-time">🕐 10 分鐘</div>
+  </div>
+  <p class="tip">三節課的校園照片與詩句作品，如果要發布到網路上，你需要先想清楚這些問題！</p>
+
+  <!-- Q7 確認清單 -->
+  <div class="checklist">
+    <div style="font-size:12px;font-weight:700;color:var(--ink);margin-bottom:6px;">
+      <span class="q-num" style="font-size:10px;padding:1px 5px;margin-right:4px;">Q7</span>
+      上傳前，我確認了⋯⋯（勾選你會做的，<em style="font-style:normal;color:var(--gold);">至少勾 4 項</em>）
+    </div>
+    <label class="check-item"><input type="checkbox" name="q3_check" value="1"><span class="check-num">①</span><span>照片中有同學的臉，我已取得他/她的同意（或將臉部適當模糊處理）</span></label>
+    <label class="check-item"><input type="checkbox" name="q3_check" value="2"><span class="check-num">②</span><span>詩句中引用了別人的句子，我有標明來源或出處</span></label>
+    <label class="check-item"><input type="checkbox" name="q3_check" value="3"><span class="check-num">③</span><span>這張照片沒有包含他人不願公開的個人資訊（如住家、門牌）</span></label>
+    <label class="check-item"><input type="checkbox" name="q3_check" value="4"><span class="check-num">④</span><span>我想清楚了：這份作品真的適合公開分享嗎？</span></label>
+    <label class="check-item"><input type="checkbox" name="q3_check" value="5"><span class="check-num">⑤</span><span>我了解一旦上傳到網路，內容就有可能被保存、轉傳，難以完全刪除</span></label>
+  </div>
+
+  <!-- Q8 照片處理 -->
+  <div class="q-block">
+    <div class="q-label">
+      <span class="q-num">Q8</span>
+      如果要把第一節的校園照片 PO 上社群，你會怎麼做？（可多選）
+    </div>
+    <div class="options-grid">
+      <label class="opt" data-correct="q3_photo:mosaic"><input type="checkbox" name="q3_photo" value="mosaic"> 把同學的臉打上馬賽克</label>
+      <label class="opt" data-correct="q3_photo:consent"><input type="checkbox" name="q3_photo" value="consent"> 先徵得照片中同學的同意</label>
+      <label class="opt" data-correct="q3_photo:private"><input type="checkbox" name="q3_photo" value="private"> 確認沒有包含個人隱私資訊</label>
+      <label class="opt"><input type="checkbox" name="q3_photo" value="direct"> 直接上傳，反正是在學校拍的</label>
+    </div>
+  </div>
+
+  <!-- Q9 情緒反思 -->
+  <div class="q-block">
+    <div class="q-label">
+      <span class="q-num">Q9</span>
+      如果有人把你寫的詩句截圖傳播，但沒有標你的名字，你的感受是？
+    </div>
+    <div class="options-grid">
+      <label class="opt"><input type="radio" name="q3_feel" value="angry"> 很生氣，那是我的作品！</label>
+      <label class="opt"><input type="radio" name="q3_feel" value="sad"> 有點失落，想被認識我的努力</label>
+      <label class="opt"><input type="radio" name="q3_feel" value="ok"> 無所謂，只要作品被看到</label>
+      <label class="opt"><input type="radio" name="q3_feel" value="happy"> 很高興，能被傳播真好</label>
+    </div>
+    <div style="margin-top:5px;">
+      <span style="font-size:11px;color:var(--gray);">因為（最多 20 字）：</span>
+      <input type="text" id="q3_feel_reason" class="short-answer" maxlength="20" placeholder="說說感受…">
+      <div class="char-count"><span id="q3_feel_cnt">0</span> / 20</div>
+    </div>
+  </div>
+
+  <!-- Q10 完成句子 -->
+  <div class="q-block">
+    <div class="q-label">
+      <span class="q-num">Q10</span>
+      完成這個句子：「以前我以為『看到＝真相』，現在我知道⋯⋯」
+    </div>
+    <select id="q3_complete" class="q-select">
+      <option value="">── 請選擇一個答案 ──</option>
+      <option value="a">只有清晰的圖片才是真實的</option>
+      <option value="b">眼見不一定為憑，需要查證和判斷</option>
+      <option value="c">AI 生成的圖片一定有明顯破綻</option>
+      <option value="d">不要相信網路上的任何訊息</option>
+    </select>
+  </div>
+</div><!-- end 活動三 -->
+
+<!-- ══ 誓詞 + 簽名 ══ -->
+<div class="oath-box">
+  <span class="tape-h"></span>
+  <div class="oath-title">🏅 數位公民小偵探誓詞</div>
+  <div class="oath-text">
+    我承諾：在轉發任何資訊前，我會先 <strong>停、看、聽</strong>，<br>
+    尊重他人的隱私與著作，成為傳播真實與善意的數位公民。
+  </div>
+  <div class="sig-area">
+    <div class="sig-label">✍️ 請在下方親筆簽名（用滑鼠或手指書寫）</div>
+    <canvas id="sigCanvas" width="320" height="90"></canvas>
+    <button class="sig-btn" onclick="clearSig()">🗑️ 清除重簽</button>
+  </div>
+</div>
+
+<!-- ── 提交 ── -->
+<div class="submit-area">
+  <button class="submit-btn" id="submitBtn" onclick="handleSubmit()">
+    🔍 提交作答，揭曉成績！
+  </button>
+  <div class="submit-hint">提交後將自動評分並生成你的偵探結業紀念卡</div>
+</div>
+
+<!-- ══ 成績 ══ -->
+<div id="resultsSection">
+  <div class="score-header">
+    <div style="font-family:'Noto Serif TC',serif;font-size:11px;color:var(--gray);letter-spacing:.1em;">偵探任務評分結果</div>
+    <div class="score-big"><span id="scoreNum">0</span><span class="score-sub"> / 20 分</span></div>
+    <div class="score-msg" id="scoreMsg"></div>
+  </div>
+  <div id="feedbackList"></div>
+
+  <!-- 紀念卡 -->
+  <div id="certSection">
+    <div class="cert-title-label">🏅 偵探結業紀念卡</div>
+    <canvas id="certCanvas" width="800" height="480"></canvas><br>
+    <button class="cert-btn" onclick="downloadCert()">💾 儲存紀念卡（PNG）</button>
+  </div>
+
+  <div class="send-status" id="sendStatus"></div>
+</div>
+
+</div><!-- end .page -->
+
+<script>
+/* ════════════════════════════════════════════════════
+   設定區：教師請填入 Firebase 專案設定
+   ════════════════════════════════════════════════════
+   步驟：Firebase Console → 專案設定 → 你的應用程式 → 複製 firebaseConfig
+   ════════════════════════════════════════════════════ */
+const firebaseConfig = {
+  apiKey:            "",   // 填入你的 apiKey
+  authDomain:        "",   // 例："your-project.firebaseapp.com"
+  projectId:         "",   // 例："your-project-id"
+  storageBucket:     "",
+  messagingSenderId: "",
+  appId:             "",
+};
+
+// Firebase 初始化（config 有填才啟動）
+let db = null;
+if (firebaseConfig.projectId) {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+}
+
+/* ── 答案鍵 ── */
+const ANS = {
+  q1_obs1: 'c',
+  q1_obs2: 'd',
+  q1_action: 'query',
+  q1_stop: 'b',
+  q1_look: 'b',
+  q1_listen: 'b',
+  flaw_correct: ['text','finger','bg','physics'],
+  flaw_wrong: ['color','hd'],
+  j1:'fake', j2:'fake', j3:'fake', j4:'fake',
+  q2_connect: 'b',
+  q3_check_min: 4,
+  photo_correct: ['mosaic','consent','private'],
+  photo_wrong: ['direct'],
+  q3_complete: 'b',
+};
+
+/* ── 工具函式 ── */
+const radio = n => { const el = document.querySelector(`input[name="${n}"]:checked`); return el?.value ?? null; };
+const checks = n => [...document.querySelectorAll(`input[name="${n}"]:checked`)].map(e=>e.value);
+
+/* ── 圖片揭曉 ── */
+function revealImage() {
+  document.getElementById('img3').style.filter = 'none';
+  document.getElementById('revealBtn').style.display = 'none';
+  const m = document.getElementById('revealMsg');
+  m.textContent = '✅ 真相大圖，現在清楚了！';
+  m.style.color = '#27ae60';
+}
+
+/* ── 字數計數 ── */
+function bindCount(inputId, cntId) {
+  const inp = document.getElementById(inputId);
+  const cnt = document.getElementById(cntId);
+  if (inp && cnt) inp.addEventListener('input', () => cnt.textContent = inp.value.length);
+}
+bindCount('q1_reason','q1_reason_cnt');
+bindCount('q3_feel_reason','q3_feel_cnt');
+
+/* ── 簽名畫布 ── */
+const sigC = document.getElementById('sigCanvas');
+const sigX = sigC.getContext('2d');
+sigX.strokeStyle = '#1a1a2e'; sigX.lineWidth = 2.2; sigX.lineCap = 'round'; sigX.lineJoin = 'round';
+let signing = false, hasSigned = false;
+
+function pos(e) {
+  const r = sigC.getBoundingClientRect();
+  const src = e.touches ? e.touches[0] : e;
+  return { x: (src.clientX - r.left) * (sigC.width / r.width),
+           y: (src.clientY - r.top)  * (sigC.height / r.height) };
+}
+sigC.addEventListener('mousedown', e => { signing=true; const p=pos(e); sigX.beginPath(); sigX.moveTo(p.x,p.y); });
+sigC.addEventListener('mousemove', e => { if(!signing) return; const p=pos(e); sigX.lineTo(p.x,p.y); sigX.stroke(); hasSigned=true; });
+sigC.addEventListener('mouseup',   () => signing=false);
+sigC.addEventListener('mouseleave',() => signing=false);
+sigC.addEventListener('touchstart', e => { e.preventDefault(); signing=true; const p=pos(e); sigX.beginPath(); sigX.moveTo(p.x,p.y); }, {passive:false});
+sigC.addEventListener('touchmove',  e => { e.preventDefault(); if(!signing) return; const p=pos(e); sigX.lineTo(p.x,p.y); sigX.stroke(); hasSigned=true; }, {passive:false});
+sigC.addEventListener('touchend',   () => signing=false);
+function clearSig() { sigX.clearRect(0,0,sigC.width,sigC.height); hasSigned=false; }
+
+/* ── 評分 ── */
+function gradeForm() {
+  let score = 0;
+  const fb = [];
+
+  // obs1 (1pt)
+  const o1 = radio('q1_obs1');
+  if (o1 === ANS.q1_obs1) { score+=1; fb.push({q:'圖①觀察', ok:true,  msg:'答對了！模糊的圖確實無法辨識。'}); }
+  else                    { fb.push({q:'圖①觀察', ok:false, msg:'模糊圖讓人無法判斷真相。正確答案：「看不清楚，太模糊了」。', ex:'模糊與裁切是常見的誤導手法。'}); }
+
+  // obs2 (1pt)
+  const o2 = radio('q1_obs2');
+  if (o2 === ANS.q1_obs2) { score+=1; fb.push({q:'圖②局部圖觀察', ok:true,  msg:'答對！局部圖幾乎無法猜出全貌。'}); }
+  else                    { fb.push({q:'圖②局部圖觀察', ok:false, msg:'極度裁切的圖幾乎無法識別。正確：「完全猜不出來！」', ex:'斷章取義的圖片常被用來製造誤解。'}); }
+
+  // Q1 (2pt)
+  const a = radio('q1_action');
+  if (a === ANS.q1_action) { score+=2; fb.push({q:'Q1 可疑截圖的反應', ok:true,  msg:'正確！遇到可疑資訊，第一步要先停下來查證。'}); }
+  else                     { fb.push({q:'Q1 可疑截圖的反應', ok:false, msg:'正確答案是「先停下來查證」。', ex:'立刻分享可能讓假訊息快速擴散。'}); }
+
+  // Q2 停 (2pt)
+  const st = radio('q1_stop');
+  if (st === ANS.q1_stop) { score+=2; fb.push({q:'Q2 停 STOP', ok:true,  msg:'答對！暫停不轉發是最重要的第一步。'}); }
+  else                    { fb.push({q:'Q2 停 STOP', ok:false, msg:'「停」就是暫停，不要馬上轉發。', ex:'資訊未查證前轉發，容易成為假訊息傳播的幫手。'}); }
+
+  // Q3 看 (2pt)
+  const lk = radio('q1_look');
+  if (lk === ANS.q1_look) { score+=2; fb.push({q:'Q3 看 LOOK', ok:true,  msg:'正確！找原始來源、查完整脈絡才是真正的「看」。'}); }
+  else                    { fb.push({q:'Q3 看 LOOK', ok:false, msg:'按讚數或問同學都不可靠。要找原始資訊來源。', ex:'熱門 ≠ 正確，要查來源和完整脈絡。'}); }
+
+  // Q4 聽 (2pt)
+  const ls = radio('q1_listen');
+  if (ls === ANS.q1_listen) { score+=2; fb.push({q:'Q4 聽 LISTEN', ok:true,  msg:'答對！搜尋多個媒體才是正確的「聽」。'}); }
+  else                      { fb.push({q:'Q4 聽 LISTEN', ok:false, msg:'不能只聽一種說法，要搜尋多個媒體的報導。', ex:'轉發量最多不等於最正確。'}); }
+
+  // Q5 多選破綻 (2pt)
+  const flaws = checks('q2_flaw');
+  const hitCorrect = ANS.flaw_correct.filter(f => flaws.includes(f));
+  const hitWrong   = ANS.flaw_wrong.filter(f => flaws.includes(f));
+  if (hitCorrect.length >= 3 && hitWrong.length === 0) {
+    score+=2; fb.push({q:'Q5 AI 破綻辨識', ok:true, msg:`找到 ${hitCorrect.length} 個真正的 AI 破綻！非常厲害。`});
+  } else if (hitCorrect.length >= 2 && hitWrong.length <= 1) {
+    score+=1; fb.push({q:'Q5 AI 破綻辨識', ok:false, msg:'部分正確。AI 破綻包含：文字亂碼、手指異常、背景重複、物理不合理。', ex:'顏色鮮豔和解析度高不是 AI 破綻的判斷依據。'});
+  } else {
+    fb.push({q:'Q5 AI 破綻辨識', ok:false, msg:'AI 破綻是：文字亂碼、手指異常、背景重複、物理邏輯不合理。', ex:'顏色和解析度不是可靠的辨識依據。'});
+  }
+
+  // Q2b 判斷表 (各1pt)
+  [['j1','路標文字奇怪'],['j2','7根手指'],['j3','建築物重複'],['j4','臉清晰背景模糊']].forEach(([n,label],i) => {
+    const ans = radio(n);
+    if (ans === 'fake') { score+=1; fb.push({q:`判斷${i+1}：${label}`, ok:true, msg:'判斷正確！這是 AI 圖片的可疑特徵。'}); }
+    else { fb.push({q:`判斷${i+1}：${label}`, ok:false, msg:`「${label}」是 AI 生成的可疑特徵，應選「可能是假圖」。`, ex:'正常照片很少出現這些異常。'}); }
+  });
+
+  // Q6 連結 (2pt)
+  const cn = radio('q2_connect');
+  if (cn === ANS.q2_connect) { score+=2; fb.push({q:'Q6 連結第一節體驗', ok:true,  msg:'答對！查證就是主動尋找完整的原始資訊。'}); }
+  else                       { fb.push({q:'Q6 連結第一節體驗', ok:false, msg:'查證的本質：主動去找完整的、原始的資訊。', ex:'密碼是比喻——現實中需要主動查詢可靠來源。'}); }
+
+  // Q7 清單 (1pt)
+  const chk = checks('q3_check');
+  if (chk.length >= ANS.q3_check_min) { score+=1; fb.push({q:'Q7 上傳確認清單', ok:true, msg:`你勾選了 ${chk.length} 項，非常負責任！`}); }
+  else { fb.push({q:'Q7 上傳確認清單', ok:false, msg:`你勾選了 ${chk.length} 項（需至少 4 項）。每個確認都很重要！`}); }
+
+  // Q8 照片處理 (1pt)
+  const photo = checks('q3_photo');
+  const hitP  = ANS.photo_correct.filter(p => photo.includes(p));
+  const hitPW = ANS.photo_wrong.filter(p => photo.includes(p));
+  if (hitP.length >= 2 && hitPW.length === 0) { score+=1; fb.push({q:'Q8 照片分享處理', ok:true, msg:'很棒！你知道上傳前需要保護隱私。'}); }
+  else { fb.push({q:'Q8 照片分享處理', ok:false, msg:'上傳前需要：打馬賽克、取得同意、確認無隱私。', ex:'「反正是學校拍的」不是可以任意分享的理由。'}); }
+
+  // Q9 情緒 (1pt, 任何答案)
+  const feel = radio('q3_feel');
+  if (feel) { score+=1; fb.push({q:'Q9 著作被傳播的感受', ok:true, msg:'謝謝你誠實分享感受！每種感受都很真實。'}); }
+  else      { fb.push({q:'Q9 著作被傳播的感受', ok:false, msg:'請選擇你的感受。'}); }
+
+  // Q10 完成句子 (1pt)
+  const cmp = document.getElementById('q3_complete').value;
+  if (cmp === ANS.q3_complete) { score+=1; fb.push({q:'Q10 完成句子', ok:true, msg:'說得很好！眼見不一定為憑，查證才是關鍵。'}); }
+  else if (cmp) { fb.push({q:'Q10 完成句子', ok:false, msg:'最佳答案：「眼見不一定為憑，需要查證和判斷」。', ex:'完全不相信任何訊息也不正確——我們需要的是判斷力。'}); }
+  else { fb.push({q:'Q10 完成句子', ok:false, msg:'請選擇一個答案完成句子。'}); }
+
+  return { score, total:20, feedback:fb };
+}
+
+/* ── 高亮表單答案 ── */
+function highlightForm() {
+  // radio + checkbox .opt items
+  document.querySelectorAll('.opt').forEach(opt => {
+    const inp = opt.querySelector('input');
+    if (!inp) return;
+    const correctAttr = opt.dataset.correct; // "name:value"
+    const isCorrectOpt = !!correctAttr;
+    inp.disabled = true;
+    if (inp.checked && isCorrectOpt)  opt.classList.add('answered-correct');
+    else if (inp.checked && !isCorrectOpt) opt.classList.add('answered-wrong');
+    else if (!inp.checked && isCorrectOpt) opt.classList.add('missed-correct');
+  });
+
+  // judgment table
+  [['j1','jrow1'],['j2','jrow2'],['j3','jrow3'],['j4','jrow4']].forEach(([n,rowId]) => {
+    const row = document.getElementById(rowId);
+    if (!row) return;
+    row.querySelectorAll('input').forEach(i => i.disabled=true);
+    const ans = radio(n) ?? document.querySelector(`input[name="${n}"]:checked`)?.value;
+    if (ans === 'fake') row.classList.add('j-correct');
+    else if (ans === 'real') row.classList.add('j-wrong');
+  });
+
+  // select + text
+  document.getElementById('q3_complete').disabled = true;
+  ['q1_reason','q3_feel_reason','s_name','s_class','s_seat','s_date'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.readOnly = el.disabled = true;
+  });
+}
+
+/* ── 顯示成績 ── */
+function showResults(score, total, feedback) {
+  const sec = document.getElementById('resultsSection');
+  sec.style.display = 'block';
+  document.getElementById('scoreNum').textContent = score;
+
+  const msgs = [
+    [18, '🏅 頂尖偵探！概念超級扎實，你是班上的數位素養楷模！'],
+    [14, '🔍 優秀偵探！大部分觀念都正確，再複習一下錯題就完美了！'],
+    [10, '📋 見習偵探！有些觀念需要加強，繼續努力！'],
+    [0,  '💡 初學偵探！仔細看每題的解說，下次一定能進步！'],
+  ];
+  document.getElementById('scoreMsg').textContent = msgs.find(([m]) => score >= m)[1];
+
+  document.getElementById('feedbackList').innerHTML = feedback.map(fb => `
+    <div class="fb-item ${fb.ok ? 'ok' : 'bad'}">
+      <span class="fb-icon">${fb.ok ? '✅' : '❌'}</span>
+      <div class="fb-text">
+        <strong>${fb.q}</strong>${fb.msg}
+        ${fb.ex ? `<div class="fb-explain">💡 ${fb.ex}</div>` : ''}
+      </div>
+    </div>`).join('');
+
+  sec.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+/* ── 紀念卡生成 ── */
+function generateCert(name, score, total, dateStr) {
+  document.getElementById('certSection').style.display = 'block';
+  const cv = document.getElementById('certCanvas');
+  const cx = cv.getContext('2d');
+  const W = 800, H = 480;
+  cv.width = W; cv.height = H;
+
+  // BG
+  cx.fillStyle = '#1a1a2e';
+  cx.fillRect(0,0,W,H);
+
+  // Grid
+  cx.strokeStyle = 'rgba(180,160,120,.07)'; cx.lineWidth = .5;
+  for (let x=0;x<W;x+=25){ cx.beginPath(); cx.moveTo(x,0); cx.lineTo(x,H); cx.stroke(); }
+  for (let y=0;y<H;y+=25){ cx.beginPath(); cx.moveTo(0,y); cx.lineTo(W,y); cx.stroke(); }
+
+  // Borders
+  cx.strokeStyle = '#b8860b'; cx.lineWidth = 3;
+  cx.strokeRect(12,12,W-24,H-24);
+  cx.strokeStyle = 'rgba(184,134,11,.3)'; cx.lineWidth = 1;
+  cx.strokeRect(20,20,W-40,H-40);
+
+  // Corners
+  cx.fillStyle = '#b8860b'; cx.font = '13px serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
+  [[26,26],[W-26,26],[26,H-26],[W-26,H-26]].forEach(([x,y]) => cx.fillText('✦',x,y));
+
+  // School name
+  cx.fillStyle = '#aaa'; cx.font = '12px sans-serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
+  cx.fillText('新北市板橋區海山國小｜國語文學習單', W/2, 52);
+
+  // Main title
+  cx.fillStyle = '#f5e6a3'; cx.font = 'bold 20px serif';
+  cx.fillText('數位公民小偵探 ── 結業紀念卡', W/2, 82);
+
+  // Divider
+  cx.strokeStyle = '#b8860b'; cx.lineWidth = 1;
+  cx.beginPath(); cx.moveTo(70,104); cx.lineTo(W-70,104); cx.stroke();
+
+  // Badge
+  cx.font = '64px serif'; cx.fillText('🏅', 115, 210);
+
+  // Name
+  cx.fillStyle = '#fff'; cx.font = 'bold 40px serif';
+  cx.fillText(name || '（未填姓名）', W/2, 188);
+
+  // Subtitle
+  cx.fillStyle = '#b8860b'; cx.font = '14px serif';
+  cx.fillText('已完成「時光偵探學習單」第三節課程', W/2, 222);
+
+  // Score
+  const pct = Math.round(score/total*100);
+  cx.fillStyle = score>=18 ? '#f5e6a3' : score>=14 ? '#87ceeb' : '#ccc';
+  cx.font = 'bold 34px serif';
+  cx.fillText(`${score} / ${total} 分`, W/2, 278);
+  cx.fillStyle = '#999'; cx.font = '14px sans-serif';
+  cx.fillText(`正確率 ${pct}%`, W/2, 304);
+
+  // Date
+  cx.fillStyle = '#777'; cx.font = '13px sans-serif';
+  cx.fillText(dateStr, W/2, 330);
+
+  // Divider
+  cx.strokeStyle = 'rgba(184,134,11,.25)'; cx.lineWidth = 1;
+  cx.beginPath(); cx.moveTo(70,352); cx.lineTo(W-70,352); cx.stroke();
+
+  // Sig label
+  cx.fillStyle = '#777'; cx.font = '11px sans-serif'; cx.textAlign = 'right';
+  cx.fillText('偵探親簽：', W-170, 390);
+
+  // Copy signature
+  cx.drawImage(sigC, W-300, 362, 240, 72);
+
+  // Seal circle
+  cx.fillStyle = 'rgba(184,134,11,.12)'; cx.beginPath(); cx.arc(85,420,36,0,Math.PI*2); cx.fill();
+  cx.strokeStyle = '#b8860b'; cx.lineWidth = 1.5; cx.stroke();
+  cx.fillStyle = '#b8860b'; cx.font = 'bold 10px serif'; cx.textAlign = 'center';
+  cx.fillText('海山', 85,415); cx.fillText('國小', 85,428);
+
+  // School label
+  cx.fillStyle = '#555'; cx.font = '10px sans-serif'; cx.textAlign = 'left';
+  cx.fillText('海山國小｜數位公民教育', 130, 425);
+
+  // Footer
+  cx.fillStyle = '#444'; cx.textAlign = 'center';
+  cx.fillText('資料來源：教育部數位素養教育平台 eliteracy.edu.tw', W/2, 458);
+}
+
+function downloadCert() {
+  const cv = document.getElementById('certCanvas');
+  const name = document.getElementById('s_name').value || '偵探';
+  const a = document.createElement('a');
+  a.download = `時光偵探紀念卡_${name}.png`;
+  a.href = cv.toDataURL('image/png');
+  a.click();
+}
+
+/* ── 上傳 Firebase Firestore ── */
+async function uploadFirebase(data) {
+  const statusEl = document.getElementById('sendStatus');
+  if (!db) {
+    statusEl.textContent = '（教師尚未設定 Firebase，本次作答未上傳）';
+    return;
+  }
+  statusEl.textContent = '📤 正在上傳作答紀錄⋯⋯';
+  try {
+    await db.collection('detective_submissions').add({
+      ...data,
+      submitted_at: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    statusEl.textContent = '✅ 作答已即時上傳！老師後台正在即時接收。';
+    statusEl.style.color = '#27ae60';
+  } catch(e) {
+    statusEl.textContent = '⚠️ 上傳失敗：' + e.message;
+    statusEl.style.color = '#e74c3c';
+  }
+}
+
+/* ── 主提交流程 ── */
+function handleSubmit() {
+  const name = document.getElementById('s_name').value.trim();
+  const cls  = document.getElementById('s_class').value.trim();
+  const seat = document.getElementById('s_seat').value.trim();
+  const date = document.getElementById('s_date').value;
+
+  const warn = document.getElementById('warnBox');
+  const missing = [];
+  if (!cls)  missing.push('班級');
+  if (!seat) missing.push('座號');
+  if (!name) missing.push('姓名');
+  if (!date) missing.push('日期');
+  if (missing.length) {
+    warn.style.display = 'block';
+    warn.textContent = `⚠️ 請先填寫：${missing.join('、')}！`;
+    warn.scrollIntoView({behavior:'smooth'});
+    return;
+  }
+  if (!hasSigned) {
+    warn.style.display = 'block';
+    warn.textContent = '⚠️ 請先在誓詞下方完成簽名，才能提交！';
+    document.querySelector('.oath-box').scrollIntoView({behavior:'smooth'});
+    return;
+  }
+  warn.style.display = 'none';
+
+  const { score, total, feedback } = gradeForm();
+  highlightForm();
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = '✅ 已提交';
+
+  showResults(score, total, feedback);
+
+  const dateStr = new Date(date).toLocaleDateString('zh-TW',{year:'numeric',month:'long',day:'numeric'});
+  generateCert(name, score, total, dateStr);
+
+  // Collect all answers for upload
+  const payload = {
+    name, class_name:cls, seat, date,
+    q1_obs1: radio('q1_obs1'),
+    q1_obs2: radio('q1_obs2'),
+    q1_action: radio('q1_action'),
+    q1_reason: document.getElementById('q1_reason').value,
+    q1_stop: radio('q1_stop'),
+    q1_look: radio('q1_look'),
+    q1_listen: radio('q1_listen'),
+    q2_flaws: checks('q2_flaw').join(','),
+    j1: radio('j1'), j2: radio('j2'), j3: radio('j3'), j4: radio('j4'),
+    q2_connect: radio('q2_connect'),
+    q3_check: checks('q3_check').join(','),
+    q3_photo: checks('q3_photo').join(','),
+    q3_feel: radio('q3_feel'),
+    q3_feel_reason: document.getElementById('q3_feel_reason').value,
+    q3_complete: document.getElementById('q3_complete').value,
+    score,
+    submitted_at: new Date().toISOString(),
+  };
+  uploadFirebase(payload);
+}
+
+// 預設今天日期
+document.getElementById('s_date').valueAsDate = new Date();
+</script>
+</body>
+</html>
