@@ -295,18 +295,18 @@ body {
     <div class="divider-line"></div>
     <div class="section-time">🕐 15 分鐘</div>
   </div>
-  <p class="tip">同一個畫面，換個角度看，意思就完全不同！觀察下面三張圖的差異，再回答問題。你會發現：模糊或局部的圖，很容易讓人產生錯誤的判斷——這就是「斷章取義」。</p>
+  <p class="tip">同一張圖，配上不同的說法，意思就完全不同！觀察下面三張圖，你會發現：光是把圖片放到「錯誤的脈絡」裡，就能製造出假新聞——這就是「移花接木」。下方圖片來自台灣事實查核中心的真實查核案例。</p>
 
   <!-- 三圖互動 -->
   <div class="observe-grid">
     <div class="obs-card">
       <div class="obs-label"><span>圖①：模糊圖</span><span class="obs-tag">初次看到</span></div>
       <div class="obs-img-box">
-        <img id="img1" src="full-scene.svg" class="img-blurred" alt="模糊示範圖">
+        <img id="img1" src="https://tfc-taiwan.org.tw/wp-content/uploads/original/files/imce/images/152_04.jpg" class="img-blurred" alt="模糊示範圖" onerror="this.style.display='none';this.parentElement.innerHTML+='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;flex-direction:column;gap:6px;font-size:11px;color:#6b6b7a;\'><span style=\'font-size:28px;\'>🔍</span><span>（模糊圖示意）</span></div>'">
       </div>
       <div style="font-size:10px;color:var(--gray);margin-bottom:3px;">我能看出的是？</div>
       <label class="opt" style="font-size:11px;padding:3px 6px;margin-bottom:2px;">
-        <input type="radio" name="q1_obs1" value="a"> 一個人的臉
+        <input type="radio" name="q1_obs1" value="a"> 很多人在吵架
       </label>
       <label class="opt" style="font-size:11px;padding:3px 6px;margin-bottom:2px;">
         <input type="radio" name="q1_obs1" value="b"> 一棟建築物
@@ -320,19 +320,19 @@ body {
     </div>
 
     <div class="obs-card">
-      <div class="obs-label"><span>圖②：局部截圖</span><span class="obs-tag">誤導版</span></div>
+      <div class="obs-label"><span>圖②：網路流傳圖</span><span class="obs-tag">誤導版</span></div>
       <div class="obs-img-box">
-        <img id="img2" src="partial.svg" alt="局部示範圖" style="width:100%;height:100%;object-fit:cover;">
+        <img id="img2" src="https://tfc-taiwan.org.tw/wp-content/uploads/original/files/imce/images/152_04.jpg" alt="網路誤傳圖示範" style="width:100%;height:100%;object-fit:cover;" onerror="this.outerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;flex-direction:column;gap:6px;font-size:11px;color:#6b6b7a;text-align:center;padding:8px;\'>🦧🔥<br>（誤傳圖示意：<br>猩猩在火場中）</div>'">
       </div>
-      <div style="font-size:10px;color:var(--gray);margin-bottom:3px;">看這張，你第一眼以為是？</div>
+      <div style="font-size:10px;color:var(--gray);margin-bottom:3px;">這張圖被轉傳時，說的是？</div>
       <label class="opt" style="font-size:11px;padding:3px 6px;margin-bottom:2px;" data-correct="q1_obs2:a">
-        <input type="radio" name="q1_obs2" value="a"> 有人要被攻擊
+        <input type="radio" name="q1_obs2" value="a"> 亞馬遜森林大火的受難動物
       </label>
       <label class="opt" style="font-size:11px;padding:3px 6px;margin-bottom:2px;">
-        <input type="radio" name="q1_obs2" value="b"> 朋友在玩遊戲
+        <input type="radio" name="q1_obs2" value="b"> 婆羅洲的動物救援行動
       </label>
       <label class="opt" style="font-size:11px;padding:3px 6px;margin-bottom:2px;">
-        <input type="radio" name="q1_obs2" value="c"> 運動比賽畫面
+        <input type="radio" name="q1_obs2" value="c"> 動物園的餵食活動
       </label>
       <label class="opt" style="font-size:11px;padding:3px 6px;">
         <input type="radio" name="q1_obs2" value="d"> 完全看不出來
@@ -345,8 +345,9 @@ body {
         <!-- 圖片預設隱藏，按顯影才出現 -->
         <img id="img3"
              src=""
-             data-src="full-scene.svg"
-             style="display:none;transition:opacity .7s;" alt="清晰原圖">
+             data-src="https://tfc-taiwan.org.tw/wp-content/uploads/original/files/imce/images/152_05.jpg"
+             style="display:none;transition:opacity .7s;width:100%;height:100%;object-fit:cover;" alt="原始圖真相"
+             onerror="this.outerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;flex-direction:column;gap:6px;font-size:11px;color:#6b6b7a;text-align:center;padding:8px;\'>🦧💚<br>（原始圖示意：<br>2013-2016 年婆羅洲<br>猩猩救援行動）</div>'"
         <!-- 顯影前佔位 -->
         <div id="revealPlaceholder" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:8px;">
           <span style="font-size:28px;">🔒</span>
@@ -356,6 +357,12 @@ body {
       </div>
       <div style="font-size:10px;color:var(--gray);text-align:center;margin-top:4px;" id="revealMsg">按下顯影，看清真相</div>
     </div>
+  </div>
+
+  <!-- TFC 出處 -->
+  <div style="font-size:9.5px;color:var(--gray);text-align:right;margin-top:-6px;margin-bottom:10px;line-height:1.6;">
+    📷 圖片來源：<a href="https://tfc-taiwan.org.tw/articles/792" target="_blank" style="color:var(--gold);">台灣事實查核中心｜《錯誤》傳「亞馬遜森林大火恐致物種滅絕危機」動物照片</a><br>
+    圖③ 原始脈絡：2013–2016 年婆羅洲猩猩救援行動（非亞馬遜、非 2019 年）
   </div>
 
   <!-- Q1 討論題 -->
@@ -711,8 +718,8 @@ function gradeForm() {
 
   // obs2 (1pt)
   const o2 = radio('q1_obs2');
-  if (o2 === ANS.q1_obs2) { score+=1; fb.push({q:'圖②局部截圖觀察', ok:true,  msg:'答對！局部圖讓人誤以為有人要被攻擊——這正是「斷章取義」的威力！看了全圖才知道是籃球比賽。'}); }
-  else                    { fb.push({q:'圖②局部截圖觀察', ok:false, msg:'局部截圖很容易造成誤判。這張圖只是籃球比賽，但只看局部卻像是有人要被攻擊！', ex:'斷章取義的圖片常被用來製造假新聞，看到圖片要先想：這是完整的嗎？'}); }
+  if (o2 === ANS.q1_obs2) { score+=1; fb.push({q:'圖②誤傳圖觀察', ok:true,  msg:'答對！這張圖被誤傳為「亞馬遜大火受難動物」，實際上是 2013–2016 年婆羅洲猩猩救援行動的畫面。'}); }
+  else                    { fb.push({q:'圖②誤傳圖觀察', ok:false, msg:'這張圖被誤傳為「亞馬遜大火受難動物」。但查核後發現：這是 2013–2016 年婆羅洲猩猩救援行動的照片！', ex:'「移花接木」就是把真實的圖片放到錯誤的脈絡，讓人產生誤解。'}); }
 
   // Q1 (2pt)
   const a = radio('q1_action');
