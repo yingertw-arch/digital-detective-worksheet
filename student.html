@@ -348,10 +348,16 @@ body {
     <div class="obs-card">
       <div class="obs-label"><span>圖③：清晰原圖</span><span class="obs-tag">顯影後</span></div>
       <div class="obs-img-box" style="position:relative;">
+        <!-- 圖片預設隱藏，按顯影才出現 -->
         <img id="img3"
-             src="https://eliteracy.edu.tw/Figures/pack/pack-2026-04-24-10-43-14.jpg"
-             style="filter:blur(16px);transition:filter .7s;" alt="清晰原圖"
-             onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;font-size:10px;color:#888;text-align:center;\'>✅ 清晰圖</div>'">
+             src=""
+             data-src="https://eliteracy.edu.tw/Figures/pack/pack-2026-04-24-10-43-14.jpg"
+             style="display:none;transition:opacity .7s;" alt="清晰原圖">
+        <!-- 顯影前佔位 -->
+        <div id="revealPlaceholder" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:8px;">
+          <span style="font-size:28px;">🔒</span>
+          <span style="font-size:10px;color:var(--gray);">尚未顯影</span>
+        </div>
         <button class="reveal-btn" id="revealBtn" onclick="revealImage()">🔍 顯影！</button>
       </div>
       <div style="font-size:10px;color:var(--gray);text-align:center;margin-top:4px;" id="revealMsg">按下顯影，看清真相</div>
@@ -657,7 +663,12 @@ const checks = n => [...document.querySelectorAll(`input[name="${n}"]:checked`)]
 
 /* ── 圖片揭曉 ── */
 function revealImage() {
-  document.getElementById('img3').style.filter = 'none';
+  const img = document.getElementById('img3');
+  img.src = img.dataset.src;           // 這時才載入圖片
+  img.style.display = 'block';
+  img.style.opacity = '0';
+  setTimeout(() => img.style.opacity = '1', 30);  // 淡入效果
+  document.getElementById('revealPlaceholder').style.display = 'none';
   document.getElementById('revealBtn').style.display = 'none';
   const m = document.getElementById('revealMsg');
   m.textContent = '✅ 真相大圖，現在清楚了！';
