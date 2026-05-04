@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 225">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2d1b1b"/>
+      <stop offset="100%" stop-color="#1a1a1a"/>
+    </linearGradient>
+  </defs>
+  <!-- Dark background - no context -->
+  <rect width="300" height="225" fill="url(#bg)"/>
+
+  <!-- Ball partially cut off at top (looks like a rock/weapon) -->
+  <circle cx="218" cy="28" r="36" fill="#cc5500"/>
+  <path d="M195,22 Q218,6 241,22" stroke="#8B3300" stroke-width="3" fill="none"/>
+  <path d="M197,44 Q218,56 239,44" stroke="#8B3300" stroke-width="3" fill="none"/>
+  <line x1="218" y1="0" x2="218" y2="64" stroke="#8B3300" stroke-width="2.5"/>
+
+  <!-- Raised arm (looks like about to throw at the person) -->
+  <rect x="188" y="50" width="18" height="72" rx="9" fill="#c8845a" transform="rotate(20 197 86)"/>
+  <rect x="172" y="108" width="16" height="68" rx="8" fill="#c8845a" transform="rotate(-15 180 142)"/>
+  <ellipse cx="152" cy="162" rx="22" ry="18" fill="#c8845a"/>
+
+  <!-- Motion lines -->
+  <line x1="148" y1="120" x2="118" y2="155" stroke="rgba(255,255,255,0.25)" stroke-width="2" stroke-dasharray="6,4"/>
+  <line x1="160" y1="115" x2="130" y2="148" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-dasharray="5,4"/>
+
+  <!-- Scared face (left side) -->
+  <circle cx="62" cy="148" r="54" fill="#f5d5b5"/>
+  <!-- Hair -->
+  <path d="M10,122 Q62,93 114,122" fill="#4a2c0a"/>
+  <!-- Wide scared eyes -->
+  <ellipse cx="45" cy="140" rx="13" ry="16" fill="white"/>
+  <ellipse cx="79" cy="140" rx="13" ry="16" fill="white"/>
+  <circle cx="50" cy="145" r="8" fill="#222"/>
+  <circle cx="84" cy="145" r="8" fill="#222"/>
+  <circle cx="52" cy="141" r="3" fill="white"/>
+  <circle cx="86" cy="141" r="3" fill="white"/>
+  <!-- Worried brows -->
+  <path d="M34,124 Q45,118 56,124" stroke="#4a2c0a" stroke-width="3" fill="none"/>
+  <path d="M68,124 Q79,118 90,124" stroke="#4a2c0a" stroke-width="3" fill="none"/>
+  <!-- Open scared mouth -->
+  <ellipse cx="62" cy="170" rx="18" ry="14" fill="#7a1a1a"/>
+  <ellipse cx="62" cy="170" rx="14" ry="10" fill="#bb3333"/>
+  <rect x="51" y="165" width="8" height="8" rx="1" fill="white"/>
+  <rect x="61" y="165" width="8" height="8" rx="1" fill="white"/>
+  <rect x="71" y="165" width="8" height="8" rx="1" fill="white"/>
+  <!-- Sweat drops -->
+  <ellipse cx="120" cy="108" rx="5" ry="8" fill="#87ceeb" opacity="0.85"/>
+  <ellipse cx="132" cy="124" rx="4" ry="7" fill="#87ceeb" opacity="0.7"/>
+</svg>

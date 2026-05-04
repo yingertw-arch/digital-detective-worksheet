@@ -295,17 +295,14 @@ body {
     <div class="divider-line"></div>
     <div class="section-time">🕐 15 分鐘</div>
   </div>
-  <p class="tip">老師展示了照片模糊化工具，你也親手拉動過滑桿了！來觀察三張圖片的差異，再回答下面的問題。圖片取自「教育部數位素養教育平台」eliteracy.edu.tw。</p>
+  <p class="tip">同一個畫面，換個角度看，意思就完全不同！觀察下面三張圖的差異，再回答問題。你會發現：模糊或局部的圖，很容易讓人產生錯誤的判斷——這就是「斷章取義」。</p>
 
   <!-- 三圖互動 -->
   <div class="observe-grid">
     <div class="obs-card">
       <div class="obs-label"><span>圖①：模糊圖</span><span class="obs-tag">初次看到</span></div>
       <div class="obs-img-box">
-        <img id="img1"
-             src="https://eliteracy.edu.tw/Figures/pack/pack-2026-04-24-10-43-14.jpg"
-             class="img-blurred" alt="模糊示範圖"
-             onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;font-size:10px;color:#888;text-align:center;padding:8px;\'>📷 模糊圖<br>（圖片無法載入，<br>請確認網路）</div>'">
+        <img id="img1" src="full-scene.svg" class="img-blurred" alt="模糊示範圖">
       </div>
       <div style="font-size:10px;color:var(--gray);margin-bottom:3px;">我能看出的是？</div>
       <label class="opt" style="font-size:11px;padding:3px 6px;margin-bottom:2px;">
@@ -323,25 +320,22 @@ body {
     </div>
 
     <div class="obs-card">
-      <div class="obs-label"><span>圖②：極小局部圖</span><span class="obs-tag">誤導版</span></div>
+      <div class="obs-label"><span>圖②：局部截圖</span><span class="obs-tag">誤導版</span></div>
       <div class="obs-img-box">
-        <img id="img2"
-             src="https://eliteracy.edu.tw/Figures/pack/pack-2026-04-24-10-43-14.jpg"
-             class="img-partial" alt="局部示範圖"
-             onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;font-size:10px;color:#888;text-align:center;\'>🔍 局部圖</div>'">
+        <img id="img2" src="partial.svg" alt="局部示範圖" style="width:100%;height:100%;object-fit:cover;">
       </div>
-      <div style="font-size:10px;color:var(--gray);margin-bottom:3px;">當時我以為是？</div>
-      <label class="opt" style="font-size:11px;padding:3px 6px;margin-bottom:2px;">
-        <input type="radio" name="q1_obs2" value="a"> 一片草地
+      <div style="font-size:10px;color:var(--gray);margin-bottom:3px;">看這張，你第一眼以為是？</div>
+      <label class="opt" style="font-size:11px;padding:3px 6px;margin-bottom:2px;" data-correct="q1_obs2:a">
+        <input type="radio" name="q1_obs2" value="a"> 有人要被攻擊
       </label>
       <label class="opt" style="font-size:11px;padding:3px 6px;margin-bottom:2px;">
-        <input type="radio" name="q1_obs2" value="b"> 動物的毛
+        <input type="radio" name="q1_obs2" value="b"> 朋友在玩遊戲
       </label>
       <label class="opt" style="font-size:11px;padding:3px 6px;margin-bottom:2px;">
-        <input type="radio" name="q1_obs2" value="c"> 天空中的雲
+        <input type="radio" name="q1_obs2" value="c"> 運動比賽畫面
       </label>
-      <label class="opt" style="font-size:11px;padding:3px 6px;" data-correct="q1_obs2:d">
-        <input type="radio" name="q1_obs2" value="d"> 完全猜不出來！
+      <label class="opt" style="font-size:11px;padding:3px 6px;">
+        <input type="radio" name="q1_obs2" value="d"> 完全看不出來
       </label>
     </div>
 
@@ -351,7 +345,7 @@ body {
         <!-- 圖片預設隱藏，按顯影才出現 -->
         <img id="img3"
              src=""
-             data-src="https://eliteracy.edu.tw/Figures/pack/pack-2026-04-24-10-43-14.jpg"
+             data-src="full-scene.svg"
              style="display:none;transition:opacity .7s;" alt="清晰原圖">
         <!-- 顯影前佔位 -->
         <div id="revealPlaceholder" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:8px;">
@@ -642,7 +636,7 @@ if (firebaseConfig.projectId) {
 /* ── 答案鍵 ── */
 const ANS = {
   q1_obs1: 'c',
-  q1_obs2: 'd',
+  q1_obs2: 'a',
   q1_action: 'query',
   q1_stop: 'b',
   q1_look: 'b',
@@ -717,8 +711,8 @@ function gradeForm() {
 
   // obs2 (1pt)
   const o2 = radio('q1_obs2');
-  if (o2 === ANS.q1_obs2) { score+=1; fb.push({q:'圖②局部圖觀察', ok:true,  msg:'答對！局部圖幾乎無法猜出全貌。'}); }
-  else                    { fb.push({q:'圖②局部圖觀察', ok:false, msg:'極度裁切的圖幾乎無法識別。正確：「完全猜不出來！」', ex:'斷章取義的圖片常被用來製造誤解。'}); }
+  if (o2 === ANS.q1_obs2) { score+=1; fb.push({q:'圖②局部截圖觀察', ok:true,  msg:'答對！局部圖讓人誤以為有人要被攻擊——這正是「斷章取義」的威力！看了全圖才知道是籃球比賽。'}); }
+  else                    { fb.push({q:'圖②局部截圖觀察', ok:false, msg:'局部截圖很容易造成誤判。這張圖只是籃球比賽，但只看局部卻像是有人要被攻擊！', ex:'斷章取義的圖片常被用來製造假新聞，看到圖片要先想：這是完整的嗎？'}); }
 
   // Q1 (2pt)
   const a = radio('q1_action');

@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <!-- Court background -->
+  <rect width="400" height="300" fill="#f5e9d5"/>
+  <rect y="228" width="400" height="72" fill="#c8924a"/>
+  <line x1="0" y1="228" x2="400" y2="228" stroke="#b07a35" stroke-width="2.5"/>
+  <!-- Center circle -->
+  <ellipse cx="200" cy="228" rx="48" ry="14" stroke="#b07a35" stroke-width="2" fill="none"/>
+
+  <!-- Scoreboard -->
+  <rect x="140" y="8" width="120" height="48" rx="6" fill="#1a1a2e"/>
+  <text x="200" y="27" font-family="Arial,sans-serif" font-size="11" fill="#aaa" text-anchor="middle">🏀 籃球賽</text>
+  <text x="200" y="48" font-family="Arial,sans-serif" font-size="14" font-weight="bold" fill="#ffd700" text-anchor="middle">5 號 攻擊中！</text>
+
+  <!-- Hoop (right) -->
+  <rect x="338" y="88" width="10" height="132" rx="3" fill="#999"/>
+  <rect x="338" y="88" width="52" height="8" rx="3" fill="#999"/>
+  <rect x="340" y="115" width="47" height="38" rx="2" fill="none" stroke="#999" stroke-width="3"/>
+  <ellipse cx="364" cy="153" rx="22" ry="6" fill="none" stroke="#ff6600" stroke-width="4"/>
+  <line x1="346" y1="157" x2="350" y2="182" stroke="#ccc" stroke-width="1.5"/>
+  <line x1="354" y1="158" x2="356" y2="184" stroke="#ccc" stroke-width="1.5"/>
+  <line x1="362" y1="159" x2="362" y2="185" stroke="#ccc" stroke-width="1.5"/>
+  <line x1="370" y1="158" x2="368" y2="184" stroke="#ccc" stroke-width="1.5"/>
+  <line x1="378" y1="157" x2="374" y2="182" stroke="#ccc" stroke-width="1.5"/>
+  <path d="M348,182 Q364,192 378,182" stroke="#ccc" stroke-width="1.5" fill="none"/>
+
+  <!-- PLAYER A (shooter #5, left) -->
+  <rect x="52" y="198" width="15" height="42" rx="5" fill="#2255cc"/>
+  <rect x="72" y="198" width="15" height="42" rx="5" fill="#2255cc"/>
+  <rect x="44" y="152" width="52" height="60" rx="8" fill="#2255cc"/>
+  <text x="70" y="184" font-family="Arial,sans-serif" font-size="16" font-weight="bold" fill="white" text-anchor="middle">5</text>
+  <circle cx="70" cy="130" r="28" fill="#f5d5b5"/>
+  <path d="M44,118 Q70,100 96,118" fill="#4a2c0a"/>
+  <!-- Focused smile -->
+  <path d="M59,144 Q70,152 81,144" stroke="#8b4040" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M58,128 Q66,123 74,128" stroke="#4a2c0a" stroke-width="2" fill="none"/>
+  <path d="M66,135 Q70,132 74,135" stroke="#4a2c0a" stroke-width="2" fill="none"/>
+  <!-- Shooting arm (same arm as partial.svg) -->
+  <line x1="96" y1="162" x2="140" y2="118" stroke="#f5d5b5" stroke-width="16" stroke-linecap="round"/>
+  <line x1="138" y1="120" x2="172" y2="78" stroke="#f5d5b5" stroke-width="14" stroke-linecap="round"/>
+  <!-- Other arm -->
+  <line x1="44" y1="168" x2="22" y2="148" stroke="#f5d5b5" stroke-width="14" stroke-linecap="round"/>
+
+  <!-- BASKETBALL (in flight) -->
+  <circle cx="230" cy="82" r="23" fill="#cc5500"/>
+  <path d="M210,77 Q230,63 250,77" stroke="#8B3300" stroke-width="2.5" fill="none"/>
+  <path d="M212,95 Q230,106 248,95" stroke="#8B3300" stroke-width="2.5" fill="none"/>
+  <line x1="230" y1="59" x2="230" y2="105" stroke="#8B3300" stroke-width="2"/>
+  <!-- Flight arc -->
+  <path d="M188,68 Q230,32 314,118" stroke="rgba(204,85,0,0.3)" stroke-width="2" fill="none" stroke-dasharray="8,6"/>
+
+  <!-- PLAYER B (defender #8, right - same face as partial but clearly in sports context) -->
+  <rect x="254" y="194" width="15" height="46" rx="5" fill="#cc2222"/>
+  <rect x="274" y="194" width="15" height="46" rx="5" fill="#cc2222"/>
+  <rect x="246" y="150" width="52" height="58" rx="8" fill="#cc2222"/>
+  <text x="272" y="180" font-family="Arial,sans-serif" font-size="16" font-weight="bold" fill="white" text-anchor="middle">8</text>
+  <circle cx="272" cy="128" r="28" fill="#f5d5b5"/>
+  <path d="M246,116 Q272,98 298,116" fill="#4a2c0a"/>
+  <!-- SAME wide eyes as partial - but now clearly excited/competitive in sports -->
+  <ellipse cx="260" cy="121" rx="11" ry="14" fill="white"/>
+  <ellipse cx="284" cy="121" rx="11" ry="14" fill="white"/>
+  <circle cx="264" cy="125" r="7" fill="#222"/>
+  <circle cx="288" cy="125" r="7" fill="#222"/>
+  <circle cx="266" cy="121" r="2.5" fill="white"/>
+  <circle cx="290" cy="121" r="2.5" fill="white"/>
+  <!-- Competitive brows (angled inward = fierce, not scared) -->
+  <path d="M252,108 Q261,103 270,108" stroke="#4a2c0a" stroke-width="3" fill="none"/>
+  <path d="M274,108 Q283,103 292,108" stroke="#4a2c0a" stroke-width="3" fill="none"/>
+  <!-- Shouting/cheering mouth (open, but clearly sports expression) -->
+  <path d="M262,143 Q272,154 282,143" stroke="#8b4040" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- Arms up BLOCKING -->
+  <line x1="246" y1="165" x2="210" y2="132" stroke="#f5d5b5" stroke-width="15" stroke-linecap="round"/>
+  <line x1="298" y1="165" x2="326" y2="132" stroke="#f5d5b5" stroke-width="15" stroke-linecap="round"/>
+
+  <!-- Crowd -->
+  <ellipse cx="18" cy="220" rx="16" ry="20" fill="#ff9999"/>
+  <ellipse cx="48" cy="216" rx="16" ry="20" fill="#88bbff"/>
+  <ellipse cx="352" cy="220" rx="16" ry="20" fill="#ffcc88"/>
+  <ellipse cx="382" cy="216" rx="16" ry="20" fill="#88dd88"/>
+  <line x1="18" y1="202" x2="8" y2="186" stroke="#ff7777" stroke-width="5" stroke-linecap="round"/>
+  <line x1="382" y1="200" x2="392" y2="184" stroke="#66cc66" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- Label at bottom -->
+  <rect x="40" y="266" width="320" height="26" rx="5" fill="rgba(0,0,0,0.65)"/>
+  <text x="200" y="283" font-family="Arial,sans-serif" font-size="11.5" fill="white" text-anchor="middle">這只是一場籃球比賽！看到全圖，才知道真相 🏀</text>
+</svg>
